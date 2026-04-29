@@ -1,0 +1,12 @@
+# **Suggested Homework**
+***
+
+1. Recreate the Pattern2 top-gene table and annotate each gene as up or down in stimulation using `pattern_gene_directionality_global.csv`.
+1. Compare Pattern2 and Pattern7. Which genes overlap, and which genes make Pattern7 look more myeloid or inflammatory?
+1. Choose one secondary pattern and write a cautious interpretation that separates strong anchor genes from broad or less specific genes.
+1. Repeat the Pattern2 cell-type summary using medians instead of means. Does the interpretation change?
+1. If compute resources are available, rerun the single-process `K = 7` model with a different seed and compare the top Pattern2 genes.
+1. Advanced: inspect the optional sweep outputs and explain why `K = 7` was chosen for the teaching workflow.
+1. Advanced: perform a pathway enrichment analysis for Pattern2 and compare it to the targeted directionality result.
+
+***

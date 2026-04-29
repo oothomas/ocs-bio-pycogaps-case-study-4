@@ -1,0 +1,34 @@
+# **Motivation**
+***
+
+Single-cell RNA-seq lets us measure gene expression in thousands of individual immune cells. That resolution is powerful, but it also creates a challenge: each cell reflects both what type of cell it is and what biological processes are active inside it.
+
+In this case study, we work with peripheral blood mononuclear cells (PBMCs) measured in control and IFN-beta stimulated conditions. IFN-beta stimulation is expected to activate interferon-stimulated genes, but the response does not happen in a vacuum. B cells, T cells, NK cells, monocytes, dendritic cells, and other PBMC populations all have their own baseline identities.
+
+This creates a motivating question: can we find latent gene-expression programs that separate a broad stimulation response from cell-type-linked structure?
+
+We will use CoGAPS, a Bayesian non-negative matrix factorization method, to represent the data as patterns. Each pattern has genes that define it and cells where it is active. We will then ask whether the strongest IFN-associated pattern is supported by the genes we expect, and whether those genes are up or down in stimulation.
+
+:::{.definition_box}
+::::{.definition_box_header}
+Latent program
+::::
+::::{.inner_block}
+A hidden pattern of coordinated gene expression inferred from the data. In this case study, a latent program may reflect immune-cell identity, stimulation-associated activity, or a mixture of both.
+::::
+:::
+
+:::{.definition_box}
+::::{.definition_box_header}
+Directionality
+::::
+::::{.inner_block}
+Whether a gene has higher or lower expression in one condition compared with another. CoGAPS pattern weights identify genes associated with a pattern, but expression direction must be estimated separately from the count data.
+::::
+:::
+
+The figure at the top of the page previews one of the main results: a CoGAPS pattern associated with IFN-beta stimulation is active across several PBMC cell types, but the activity is not uniform. The rest of this case study shows how we get to that result, how we interpret it, and where we need to be cautious.
+
+This dataset tests IFN-beta stimulation in PBMCs. If these genes are discussed in relation to dengue or other viral contexts, that interpretation should be framed as relevance to interferon and inflammatory biology, not as direct evidence of dengue infection in this dataset.
+
+***

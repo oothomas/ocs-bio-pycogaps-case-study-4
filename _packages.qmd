@@ -1,0 +1,118 @@
+# **Packages**
+***
+
+We will begin by loading the Python packages that we need for this case study.
+
+```{python}
+from __future__ import annotations
+
+from pathlib import Path
+import json
+import platform
+import sys
+
+import anndata as ad
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from scipy import sparse
+```
+
+Package | Use
+------- | ---
+[`anndata`](https://anndata.readthedocs.io/){target="_blank"} | Read and write AnnData `.h5ad` files
+[`pandas`](https://pandas.pydata.org/){target="_blank"} | Summarize metadata, pattern tables, and directionality outputs
+[`numpy`](https://numpy.org/){target="_blank"} | Matrix and numerical operations
+[`scipy`](https://scipy.org/){target="_blank"} | Sparse matrix handling and statistical summaries
+[`matplotlib`](https://matplotlib.org/){target="_blank"} | Plot figures used in the case study
+[`PyCoGAPS`](https://github.com/FertigLab/pycogaps){target="_blank"} | Optional local CoGAPS model execution
+
+We will also define paths and helper functions that will be reused across sections.
+
+```{python}
+def find_project_root(start: Path) -> Path:
+    for path in [start, *start.parents]:
+        if (path / "index.qmd").exists() and (path / "data").exists():
+            return path
+    raise FileNotFoundError("Could not locate the case-study project root.")
+
+
+ROOT = find_project_root(Path.cwd())
+
+PREPROCESSED_H5AD = ROOT / "data/processed/preprocessed_cells_hvg3000.h5ad"
+COGAPS_INPUT_H5AD = ROOT / "data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad"
+PREPROCESS_CONFIG_JSON = ROOT / "data/processed/preprocess_config_hvg3000.json"
+CHOSEN_RESULT_H5AD = ROOT / "data/results/cogaps_K7_seed2_iter2000.h5ad"
+CHOSEN_METRICS_JSON = ROOT / "data/results/cogaps_K7_seed2_iter2000.metrics.json"
+SUMMARY_BY_K_CSV = ROOT / "data/results/summary_by_K.csv"
+PER_RUN_METRICS_CSV = ROOT / "data/results/per_run_metrics.csv"
+DIRECTION_GLOBAL_CSV = ROOT / "data/results/pattern_gene_directionality_global.csv"
+DIRECTION_CELLTYPE_CSV = ROOT / "data/results/pattern_gene_directionality_by_celltype.csv"
+DIRECTION_SUMMARY_CSV = ROOT / "data/results/pattern_direction_summary.csv"
+PATTERN_GENE_WEIGHTS_TSV_GZ = ROOT / "data/results/pattern_gene_weights.tsv.gz"
+PATTERN_CELL_ACTIVITIES_TSV_GZ = ROOT / "data/results/pattern_cell_activities.tsv.gz"
+PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ = ROOT / "data/results/pattern_cell_activities_with_metadata.csv.gz"
+PATTERN_TOP_GENES_CSV = ROOT / "data/results/pattern_top_genes.csv"
+PATTERN_CORRELATIONS_CSV = ROOT / "data/results/pattern_correlations.csv"
+PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV = ROOT / "data/results/pattern_activity_by_celltype_condition.csv"
+PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV = ROOT / "data/results/pattern_activity_by_replicate_condition.csv"
+PATTERN_SUMMARY_CSV = ROOT / "data/results/pattern_summary.csv"
+
+CHOSEN_K = 7
+CHOSEN_SEED = 2
+CHOSEN_ITER = 2000
+STIM_LABEL = "stim"
+
+HAS_CACHED_COGAPS_INPUT = COGAPS_INPUT_H5AD.exists()
+HAS_CHOSEN_RESULT = CHOSEN_RESULT_H5AD.exists()
+HAS_LIGHTWEIGHT_PATTERN_MATRICES = (
+    PATTERN_GENE_WEIGHTS_TSV_GZ.exists() and PATTERN_CELL_ACTIVITIES_TSV_GZ.exists()
+)
+HAS_LIGHTWEIGHT_ACTIVITY_METADATA = PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ.exists()
+HAS_PATTERN_TOP_GENES = PATTERN_TOP_GENES_CSV.exists()
+HAS_PATTERN_CORRELATIONS = PATTERN_CORRELATIONS_CSV.exists()
+HAS_PATTERN_ACTIVITY_BY_CELLTYPE = PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV.exists()
+HAS_PATTERN_SUMMARY = PATTERN_SUMMARY_CSV.exists()
+
+ANALYSIS_MODE = (
+    "full_chosen_result"
+    if HAS_CHOSEN_RESULT
+    else "lightweight_derived"
+    if HAS_LIGHTWEIGHT_PATTERN_MATRICES
+    else "unavailable"
+)
+```
+
+```{python}
+def pattern_columns(df: pd.DataFrame) -> list[str]:
+    return sorted(
+        [c for c in df.columns if str(c).startswith("Pattern")],
+        key=lambda value: int(str(value).replace("Pattern", "")),
+    )
+
+
+def top_genes_from_matrix(A: pd.DataFrame, pattern: str, n: int = 15) -> pd.DataFrame:
+    top = A[pattern].sort_values(ascending=False).head(n)
+    top_df = top.rename("weight").reset_index()
+    top_df.columns = ["gene", "weight"]
+    return top_df
+
+
+def load_lightweight_pattern_matrices() -> tuple[pd.DataFrame, pd.DataFrame]:
+    A = pd.read_csv(PATTERN_GENE_WEIGHTS_TSV_GZ, sep="\t", compression="gzip").set_index("gene")
+    P = pd.read_csv(PATTERN_CELL_ACTIVITIES_TSV_GZ, sep="\t", compression="gzip").set_index("cell_barcode")
+    return A, P
+
+
+def build_cogaps_input(preprocessed_cells: ad.AnnData) -> ad.AnnData:
+    cogaps_input = preprocessed_cells.T.copy()
+    X = cogaps_input.X.toarray() if sparse.issparse(cogaps_input.X) else cogaps_input.X
+    cogaps_input.X = np.asarray(X, dtype=np.float64)
+    cogaps_input.var = preprocessed_cells.obs.copy()
+    cogaps_input.var_names = preprocessed_cells.obs_names.copy()
+    cogaps_input.obs = preprocessed_cells.var.copy()
+    cogaps_input.obs_names = preprocessed_cells.var_names.copy()
+    return cogaps_input
+```
+
+***

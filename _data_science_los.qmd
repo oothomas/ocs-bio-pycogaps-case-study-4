@@ -1,0 +1,9 @@
+<u>**Data Science/Bioinformatics Learning Objectives:**</u>
+
+1. Load and inspect single-cell RNA-seq data stored as an AnnData object.
+1. Summarize cell metadata, including condition, replicate, and cell-type annotations.
+1. Explain why CoGAPS uses a genes x cells input matrix and construct or load that matrix.
+1. Run one non-distributed chosen-`K` CoGAPS model or load the saved chosen-model result.
+1. Extract CoGAPS `A` and `P` matrices and connect them to gene weights and cell activities.
+1. Generate top-gene tables, pattern activity summaries, and directionality tables.
+1. Create visualizations that summarize latent pattern activity across conditions and cell types.

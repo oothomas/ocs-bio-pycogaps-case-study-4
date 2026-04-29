@@ -1,0 +1,261 @@
+# **Data Analysis**
+***
+
+This section is the core of the case study. We will use the chosen CoGAPS model, inspect the pattern matrices, identify the IFN-associated pattern, and connect pattern genes to stimulation directionality.
+
+## Why use `K = 7`?
+
+The full rank-selection sweep is not part of the main learner workflow. It was run beforehand as an instructor/reviewer-facing model-selection step. The selected model used `K = 7`, `seed = 2`, and `n_iter = 2000`.
+
+```{python}
+summary_by_k = pd.read_csv(SUMMARY_BY_K_CSV)
+summary_by_k.sort_values(["K", "n_iter"]).head(10)
+```
+
+For the selected `K = 7`, `n_iter = 2000` setting, the completed sweep summary showed strong IFN-pattern correlation stability and high top-gene overlap across seeds. This supports using `K = 7` for the teaching workflow, but it does not prove that `K = 7` is universally optimal.
+
+## Load the chosen CoGAPS result or lightweight pattern exports
+
+The default learner path loads a saved chosen model. If that large `.h5ad` file is unavailable, this case study falls back to lightweight exported pattern matrices and summary tables so the main interpretation steps still render cleanly.
+
+```{python}
+with open(CHOSEN_METRICS_JSON) as f:
+    chosen_metrics = json.load(f)
+
+if HAS_CHOSEN_RESULT:
+    result = ad.read_h5ad(CHOSEN_RESULT_H5AD)
+    pattern_names = pattern_columns(result.obs)
+    A = result.obs[pattern_names].copy()
+    A.index.name = "gene"
+    P = result.var[pattern_names].copy()
+    P.index = result.var_names.astype(str)
+    P.index.name = "cell_barcode"
+    analysis_mode_label = "Full chosen-model H5AD"
+else:
+    result = None
+    A, P = load_lightweight_pattern_matrices()
+    pattern_names = pattern_columns(A)
+    analysis_mode_label = "Lightweight exported A/P matrices"
+
+print("Analysis mode:", analysis_mode_label)
+print("Pattern columns:", pattern_names)
+print("A matrix shape:", A.shape)
+print("P matrix shape:", P.shape)
+print("IFN-associated pattern from metrics:", chosen_metrics["ifn_pattern"])
+print("IFN correlation:", round(chosen_metrics["ifn_corr"], 4))
+print("Runtime in original environment, minutes:", round(chosen_metrics["runtime_sec"] / 60, 1))
+```
+
+::: {.column-margin}
+The saved model path is the recommended default. A local model run is useful for advanced learners, but it can take substantial time. The lightweight exports are mainly for GitHub/classroom rendering and should match the saved chosen model.
+:::
+
+<details><summary>Optional: run one single-process chosen-`K` model locally</summary>
+
+The code below shows the intended local-run path. It is not evaluated by default in this draft because it can take substantial time and depends on the local `PyCoGAPS` installation.
+
+```{python}
+#| eval: false
+from PyCoGAPS.parameters import CoParams
+from PyCoGAPS.pycogaps_main import CoGAPS
+
+params = CoParams(
+    nPatterns=CHOSEN_K,
+    nIterations=CHOSEN_ITER,
+    seed=CHOSEN_SEED,
+    useSparseOptimization=True,
+)
+
+result = CoGAPS(str(COGAPS_INPUT_H5AD), params)
+```
+
+</details>
+
+## Extract the `A` and `P` matrices
+
+The chosen result stores gene weights and cell activities as pattern columns. In the saved result, `result.obs` contains gene weights and `result.var` contains cell activities. The lightweight fallback stores those same matrices as small tabular files.
+
+```{python}
+adata_with_patterns = adata_cells.copy()
+
+missing_cells = adata_with_patterns.obs_names.difference(P.index)
+if len(missing_cells) > 0:
+    raise ValueError(f"Missing pattern activity values for {len(missing_cells)} cells.")
+
+P = P.loc[adata_with_patterns.obs_names].copy()
+for pattern in pattern_names:
+    adata_with_patterns.obs[pattern] = P[pattern].to_numpy()
+
+adata_with_patterns.obs[["condition", "cell_type", *pattern_names]].head()
+```
+
+## Identify the IFN-associated pattern
+
+We identify the stimulation-associated pattern by correlating each pattern's cell activity with a binary stimulation indicator.
+
+```{python}
+stim_indicator = (adata_with_patterns.obs["condition"].astype(str) == STIM_LABEL).astype(int)
+pattern_corrs = pd.Series(
+    {pattern: adata_with_patterns.obs[pattern].corr(stim_indicator) for pattern in pattern_names},
+    name="corr_with_stim",
+).sort_values(ascending=False)
+
+pattern_corrs
+```
+
+Pattern2 is the strongest IFN-associated pattern in this chosen model.
+
+If a cached lightweight correlation table is available, we can confirm that it matches the current render context.
+
+```{python}
+if HAS_PATTERN_CORRELATIONS:
+    cached_pattern_corrs = pd.read_csv(PATTERN_CORRELATIONS_CSV)
+    corr_check = (
+        cached_pattern_corrs.set_index("pattern")["corr_with_stim"]
+        .reindex(pattern_corrs.index)
+        .subtract(pattern_corrs)
+        .abs()
+        .max()
+    )
+    print("Max absolute difference from cached pattern_correlations.csv:", round(float(corr_check), 10))
+else:
+    print("Cached pattern_correlations.csv not available.")
+```
+
+## Inspect top genes for Pattern2
+
+```{python}
+pattern2_top_genes = top_genes_from_matrix(A, "Pattern2", n=15)
+pattern2_top_genes
+```
+
+The top Pattern2 genes include canonical interferon-stimulated genes such as `ISG15`, `ISG20`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `IFIT2`, `IRF7`, `OAS1`, `PLSCR1`, and `BST2`. This supports interpreting Pattern2 as an IFN-associated program.
+
+However, pattern weights alone do not tell us whether those genes are up or down in stimulated cells.
+
+:::{.think_question}
+::::{.think_question_header}
+Question opportunity
+::::
+::::{.inner_block}
+If a gene has a high CoGAPS weight in a pattern, does that mean it is up-regulated in stimulated cells?
+<details><summary>Answer</summary>
+No. A high CoGAPS weight means the gene helps define the pattern. To determine up- or down-regulation, we compare expression between conditions using the count data or normalized expression summaries.
+</details>
+::::
+:::
+
+## Add directionality for Pattern2 genes
+
+We answer the directionality question using a targeted paired pseudobulk analysis. The directionality table was generated from raw counts in `.layers["counts"]` by aggregating cells within donor and condition, computing `log2(stim CPM + 0.5) - log2(ctrl CPM + 0.5)`, and summarizing across donors.
+
+```{python}
+direction_global = pd.read_csv(DIRECTION_GLOBAL_CSV)
+
+pattern2_direction = (
+    direction_global.loc[direction_global["pattern"] == "Pattern2"]
+    .sort_values("rank")
+    [[
+        "rank",
+        "gene",
+        "mean_log2fc_stim_vs_ctrl",
+        "n_up_pairs",
+        "n_down_pairs",
+        "wilcoxon_fdr",
+        "direction",
+        "evidence_strength",
+    ]]
+)
+
+pattern2_direction
+```
+
+In the current directionality analysis, 14 of the top 15 Pattern2 genes are up in IFN-beta stimulation. `FTH1` is the exception and is down in stimulation. This distinction matters: `FTH1` contributes to the pattern, but it should not be described as an up-regulated IFN-stimulated gene in this dataset.
+
+## Summarize all patterns
+
+```{python}
+if HAS_PATTERN_SUMMARY:
+    pattern_summary = pd.read_csv(PATTERN_SUMMARY_CSV)
+else:
+    pattern_summary_rows = []
+    for pattern in pattern_names:
+        top_genes = ", ".join(top_genes_from_matrix(A, pattern, n=8)["gene"].tolist())
+        dominant_cell_type = (
+            adata_with_patterns.obs.groupby("cell_type", observed=True)[pattern]
+            .mean()
+            .sort_values(ascending=False)
+            .index[0]
+        )
+        pattern_summary_rows.append(
+            {
+                "pattern": pattern,
+                "corr_with_stim": round(float(pattern_corrs[pattern]), 4),
+                "dominant_cell_type": dominant_cell_type,
+                "top_genes_top8": top_genes,
+            }
+        )
+    pattern_summary = pd.DataFrame(pattern_summary_rows)
+
+pattern_summary
+```
+
+Pattern7 is also stimulation-associated and includes genes such as `CXCL10`, `APOBEC3A`, `RSAD2`, `TNFSF10`, `IDO1`, and several interferon-stimulated genes. We interpret Pattern7 as a secondary stimulation-associated candidate, not as a fully validated distinct biological program.
+
+Pattern1 has myeloid anchors such as `MS4A7`, `TYROBP`, `FCGR3A`, `FCER1G`, and `CTSS`. Pattern6 includes antigen-presentation genes such as `CD74`, `HLA-DRA`, `HLA-DRB1`, `HLA-DPA1`, `HLA-DPB1`, and `HLA-DQA1`. These patterns are useful context for identity-like or compartment-linked structure, but their biological labels should remain cautious.
+
+## Pattern2 across cell types
+
+```{python}
+if HAS_PATTERN_ACTIVITY_BY_CELLTYPE:
+    pattern2_by_celltype = (
+        pd.read_csv(PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)
+        .loc[lambda df: df["pattern"] == "Pattern2"]
+        .sort_values(["cell_type", "condition"])
+    )
+else:
+    pattern2_by_celltype = (
+        adata_with_patterns.obs.groupby(["cell_type", "condition"], observed=True)["Pattern2"]
+        .agg(["mean", "median", "count"])
+        .reset_index()
+        .rename(columns={"mean": "mean_activity", "median": "median_activity", "count": "n_cells"})
+        .sort_values(["cell_type", "condition"])
+    )
+
+pattern2_by_celltype
+```
+
+```{python}
+plot_df = pattern2_by_celltype.pivot(index="cell_type", columns="condition", values="mean_activity")
+plot_df = plot_df.sort_values(by=STIM_LABEL, ascending=False)
+
+ax = plot_df.plot(kind="bar", figsize=(9, 4))
+ax.set_ylabel("Mean Pattern2 activity")
+ax.set_xlabel("Cell type")
+ax.set_title("Mean Pattern2 activity by cell type and condition")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+```
+
+Pattern2 activity is broad across PBMC cell types but not uniform. This supports an activity-like interpretation: the pattern is not simply a marker of one immune cell type.
+
+## Directionality across cell types
+
+```{python}
+direction_celltype = pd.read_csv(DIRECTION_CELLTYPE_CSV)
+
+pattern2_celltype_direction = (
+    direction_celltype.loc[direction_celltype["pattern"] == "Pattern2"]
+    .groupby(["cell_type", "direction"], observed=True)
+    .size()
+    .unstack(fill_value=0)
+    .reset_index()
+)
+
+pattern2_celltype_direction
+```
+
+In each annotated cell type, 14 of the top 15 Pattern2 genes are up in stimulation under the targeted pseudobulk summary, while `FTH1` is down. This reinforces the interpretation that Pattern2 captures a broad IFN-beta response, while also reminding us that the analysis is targeted and descriptive.
+
+***

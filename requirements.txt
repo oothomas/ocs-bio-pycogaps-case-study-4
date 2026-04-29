@@ -1,0 +1,7 @@
+anndata
+pandas
+numpy
+scipy
+matplotlib
+pillow
+jupyter

@@ -1,0 +1,62 @@
+# **Data Exploration**
+***
+
+Before running or interpreting a model, we should inspect what is in the AnnData object.
+
+```{python}
+print("Shape:", adata_cells.shape)
+print("Observation columns:", list(adata_cells.obs.columns))
+print("Variable columns:", list(adata_cells.var.columns))
+print("Layers:", list(adata_cells.layers.keys()))
+```
+
+The object has cells as rows and genes as columns. The shape should be 24,673 cells by 3,000 highly variable genes.
+
+## Condition and cell-type summaries
+
+```{python}
+condition_counts = (
+    adata_cells.obs["condition"]
+    .value_counts()
+    .rename_axis("condition")
+    .reset_index(name="n_cells")
+)
+
+celltype_counts = (
+    adata_cells.obs["cell_type"]
+    .value_counts()
+    .rename_axis("cell_type")
+    .reset_index(name="n_cells")
+)
+
+condition_counts
+```
+
+```{python}
+celltype_counts
+```
+
+We can also check whether every donor or replicate has cells in both conditions.
+
+```{python}
+pd.crosstab(adata_cells.obs["replicate"], adata_cells.obs["condition"])
+```
+
+## Sparsity
+
+Single-cell RNA-seq matrices often contain many zeros. We can measure sparsity directly.
+
+```{python}
+X = adata_cells.X
+nnz = X.nnz if sparse.issparse(X) else np.count_nonzero(X)
+total = adata_cells.n_obs * adata_cells.n_vars
+sparsity = 1 - (nnz / total)
+
+print(f"Nonzero entries: {nnz:,}")
+print(f"Total entries: {total:,}")
+print(f"Sparsity: {sparsity:.4%}")
+```
+
+The processed object is about 96 percent zeros. This sparse structure is one reason that we use methods designed for high-dimensional single-cell data and interpret individual genes carefully.
+
+***

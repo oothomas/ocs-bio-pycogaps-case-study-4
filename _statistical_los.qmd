@@ -1,0 +1,7 @@
+<u>**Statistical Learning Objectives:**</u>
+
+1. Describe how latent-factor methods can represent each cell as a mixture of multiple transcriptional programs.
+1. Explain why rank choice matters and how `K = 7` was selected from a limited sweep.
+1. Distinguish CoGAPS pattern membership from expression directionality.
+1. Interpret paired pseudobulk log2 fold-change summaries for targeted pattern genes.
+1. Separate descriptive evidence from formal hypothesis testing and pathway validation.

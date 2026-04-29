@@ -1,0 +1,16 @@
+# **Main Question**
+***
+
+:::{.main_question}
+::::{.main_question_header}
+Our main question(s)
+::::
+::::{.inner_block}
+1. What latent transcriptional programs are present in IFN-beta stimulated and control PBMC single-cell RNA-seq data?
+1. Can CoGAPS help distinguish broad stimulation-associated activity from cell-type-linked immune programs?
+1. Which genes define the strongest IFN-associated pattern, and are those genes up or down in stimulation?
+1. How does the IFN-associated pattern vary across annotated PBMC cell types?
+::::
+:::
+
+***

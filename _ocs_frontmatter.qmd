@@ -1,0 +1,40 @@
+:::{.disclaimer_box}
+::::{.disclaimer_box_header}
+Disclaimer
+::::
+::::{.inner_block}
+The purpose of the [Open Case Studies](https://opencasestudies.github.io){target="_blank"} project is **to demonstrate the use of various data science methods, tools, and software in the context of messy, real-world data**. A given case study does not cover all aspects of the research process, is not claiming to be the most appropriate way to analyze a given data set, and should not be used in the context of making policy decisions without external consultation from scientific experts. In addition, due to size constraints, datasets used within a case study may be subset of the original/full dataset.
+::::
+:::
+
+:::{.license_box}
+::::{.license_box_header}
+License information
+::::
+::::{.inner_block}
+This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 [(CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/deed.en){target="_blank"} United States License.
+::::
+:::
+
+This work is funded through the National Institutes of Health, specifically the National Institute of General Medical Sciences: Grant Number 1R25GM160622.
+
+---
+
+To access the GitHub repository for this case study see here: [case study source repository to be finalized](https://github.com/opencasestudies/ocs-bio-pycogaps){target="_blank"}.
+
+The draft data files included with this first-pass project are cached analysis objects and results derived from a processed PBMC single-cell RNA-seq dataset. The default learner path uses these cached files:
+
+| File | Purpose |
+| --- | --- |
+| `data/processed/preprocessed_cells_hvg3000.h5ad` | Processed cells x genes AnnData object |
+| `data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad` | Optional cached genes x cells CoGAPS input |
+| `data/results/cogaps_K7_seed2_iter2000.h5ad` | Saved chosen CoGAPS model |
+| `data/results/pattern_gene_weights.tsv.gz` | Lightweight exported gene-weight matrix for render-safe fallbacks |
+| `data/results/pattern_cell_activities.tsv.gz` | Lightweight exported cell-activity matrix for render-safe fallbacks |
+| `data/results/pattern_gene_directionality_global.csv` | Targeted directionality results for top pattern genes |
+
+The main case-study workflow does not require a cluster. Learners can complete the case study by loading the saved chosen model. If the large chosen-model file is not available, most interpretation steps can still be completed from the lightweight exported pattern tables. Running one local CoGAPS model is included as an optional exercise and may take substantial time depending on the learner's computer.
+
+The full SLURM sweep used to justify the chosen `K` is documented as optional instructor or advanced-user material in the Additional Information section.
+
+---

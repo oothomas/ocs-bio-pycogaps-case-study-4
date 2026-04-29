@@ -1,0 +1,88 @@
+---
+title: "**Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS**"
+include-sections:
+  stat-los: true
+  data-import: true
+  data-exploration: true
+  data-wrangling: true
+  data-viz: true
+  data-analysis: true
+execute:
+  warning: false
+  message: false
+---
+
+{{< include _main_image.qmd >}}
+
+{{< include _ocs_frontmatter.qmd >}}
+
+{{< include _cite.qmd >}}
+
+{{< include _motivation.qmd >}}
+
+{{< include _main_question.qmd >}}
+
+{{< include _los.qmd >}}
+
+{{< include _packages.qmd >}}
+
+{{< include _context.qmd >}}
+
+{{< include _data_description.qmd >}}
+
+{{< include _limitations.qmd >}}
+
+{{< include _bioethics.qmd >}}
+
+::: {.content-hidden unless-meta="include-sections.data-import"}
+
+{{< include _data_import.qmd >}}
+
+:::
+
+::: {.content-hidden unless-meta="include-sections.data-exploration"}
+
+{{< include _data_exploration.qmd >}}
+
+:::
+
+::: {.content-hidden unless-meta="include-sections.data-wrangling"}
+
+{{< include _data_wrangling.qmd >}}
+
+:::
+
+::: {.content-hidden unless-meta="include-sections.data-viz"}
+
+{{< include _data_visualization.qmd >}}
+
+:::
+
+::: {.content-hidden unless-meta="include-sections.data-analysis"}
+
+{{< include _data_analysis.qmd >}}
+
+:::
+
+{{< include _summary.qmd >}}
+
+{{< include _suggested_hw.qmd >}}
+
+{{< include _additional_info.qmd >}}
+
+## **Session Info**
+***
+
+```{python}
+import platform
+import sys
+
+print("Python:", sys.version)
+print("Platform:", platform.platform())
+
+for package_name in ["anndata", "pandas", "numpy", "scipy", "matplotlib"]:
+    module = __import__(package_name)
+    print(package_name, getattr(module, "__version__", "unknown"))
+```
+
+{{< include _acknowledgements.qmd >}}

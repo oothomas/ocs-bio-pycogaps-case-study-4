@@ -1,0 +1,8 @@
+{
+  "raw_h5ad": "kang_counts_25k.h5ad",
+  "min_cells": 3,
+  "target_sum": 10000.0,
+  "hvg_flavor": "seurat_v3",
+  "n_top_genes": 3000,
+  "created_at": "2026-02-22T14:25:58"
+}

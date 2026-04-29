@@ -1,0 +1,29 @@
+# **What are the data?**
+***
+
+We will use a processed subset of the PBMC IFN-beta stimulation single-cell RNA-seq dataset from Kang et al. The student-facing analysis object contains 24,673 cells and 3,000 highly variable genes. Each cell has metadata for condition, annotated cell type, and donor/replicate.
+
+Object or variable | Details
+------------------ | -------
+`preprocessed_cells_hvg3000.h5ad` | Cells x genes AnnData object used for the main learner workflow
+`condition` | Experimental condition: `ctrl` or `stim`
+`cell_type` | Annotated PBMC cell type
+`replicate` | Donor or patient replicate label
+`.layers["counts"]` | Count layer used for targeted pseudobulk directionality
+`cogaps_input_genesxcells_hvg3000_float64.h5ad` | Genes x cells matrix prepared for CoGAPS
+`cogaps_K7_seed2_iter2000.h5ad` | Saved chosen CoGAPS result used by the default path
+`pattern_gene_weights.tsv.gz` | Lightweight exported CoGAPS gene-weight (`A`) matrix
+`pattern_cell_activities.tsv.gz` | Lightweight exported CoGAPS cell-activity (`P`) matrix
+`pattern_cell_activities_with_metadata.csv.gz` | Cell-level pattern activities joined to key metadata and embeddings
+`pattern_top_genes.csv` | Top weighted genes per pattern from the chosen model
+`pattern_correlations.csv` | Pattern correlations with the stimulation indicator
+`pattern_activity_by_celltype_condition.csv` | Mean and median pattern activity summaries by cell type and condition
+`pattern_summary.csv` | Compact per-pattern interpretation table for lightweight renders
+`pattern_gene_directionality_global.csv` | Targeted global stim-vs-ctrl directionality for top pattern genes
+`pattern_gene_directionality_by_celltype.csv` | Targeted cell-type directionality for top pattern genes
+
+The local processed object is sparse: about 96 percent of entries are zero. This is typical for single-cell RNA-seq and is one reason that careful preprocessing and interpretation are important.
+
+The case study starts from cached files so learners can focus on latent-variable analysis and interpretation rather than full raw-data processing. For GitHub and other lightweight render contexts, the smaller exported pattern tables allow most of the biological interpretation to remain available even when the large chosen-model `.h5ad` file is absent.
+
+***

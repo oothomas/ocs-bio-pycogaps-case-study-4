@@ -1,0 +1,18 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+/.quarto/
+
+**/*.quarto_ipynb
+
+.DS_Store
+
+# Keep the lightweight teaching/render artifacts in git, but exclude the large
+# local-only H5AD files that are not intended for GitHub distribution.
+data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad
+data/results/cogaps_K7_seed2_iter2000.h5ad
+
+# Local scratch and render-test folders outside the teaching repo.
+_tmp*

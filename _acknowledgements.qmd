@@ -1,0 +1,8 @@
+## **Acknowledgments**
+***
+
+We would like to acknowledge the National Institute of General Medical Sciences for funding this work (1R25GM160622).
+
+This draft case study uses public PBMC IFN-beta stimulation single-cell RNA-seq data from Kang et al. and builds on the CoGAPS and scCoGAPS method literature. The case-study structure is based on the Biomedical Open Case Studies Quarto template and OTTR infrastructure.
+
+Icons are from [iconpacks](https://www.iconsets.com/).

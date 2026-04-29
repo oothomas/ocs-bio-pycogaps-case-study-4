@@ -1,0 +1,7 @@
+<u>**Biological/Topical Learning Objectives:**</u>
+
+1. Describe the PBMC IFN-beta stimulation setting and why it is useful for studying immune-response programs.
+1. Identify canonical interferon-stimulated genes that anchor the main IFN-associated CoGAPS pattern.
+1. Compare identity-like and activity-like interpretations of latent patterns.
+1. Describe how the IFN-associated pattern varies across PBMC cell types.
+1. Explain why dengue-related interpretation, if discussed, must be framed through IFN/inflammatory relevance rather than direct infection evidence.

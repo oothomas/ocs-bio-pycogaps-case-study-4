@@ -1,0 +1,33 @@
+# **Summary**
+***
+
+## **Synopsis**
+***
+
+In this case study, we used a processed PBMC single-cell RNA-seq dataset with control and IFN-beta stimulated cells to learn how a latent-variable method can reveal transcriptional programs that cut across cell-type labels.
+
+We inspected the AnnData object, summarized condition and cell-type metadata, prepared a genes x cells CoGAPS input, and loaded a saved chosen CoGAPS model. The rank `K = 7` was selected before the main learner workflow using a limited model-selection sweep. Learners do not need to run that sweep to complete the case study.
+
+The strongest stimulation-associated program in the chosen model is Pattern2. Pattern2 is anchored by canonical interferon-stimulated genes, including `ISG15`, `ISG20`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `IFIT2`, `IRF7`, `OAS1`, `PLSCR1`, and `BST2`.
+
+We also performed a targeted directionality check because CoGAPS pattern weights do not by themselves indicate whether genes are up or down in stimulation. In that analysis, 14 of the top 15 Pattern2 genes were up in IFN-beta stimulation, while `FTH1` was down.
+
+Pattern2 activity appears broad across PBMC cell types, supporting an activity-like IFN-response interpretation. Other patterns have interpretable gene anchors, such as myeloid and antigen-presentation genes, but those secondary interpretations should remain more cautious.
+
+## **Summary Plot**
+***
+
+![](img/ifn_pattern_by_celltype_split_condition.png){fig-alt="Boxplots of CoGAPS Pattern2 activity across PBMC cell types, split by control and IFN-beta stimulated conditions." width=800 .lightbox}
+
+## **Main Questions Revisited**
+***
+
+Question | Current answer | Caveat
+-------- | -------------- | ------
+What latent transcriptional programs are present? | The chosen `K = 7` model contains seven patterns, including a strong IFN-associated pattern and several compartment-linked candidates. | Not every pattern has a settled biological label.
+Can CoGAPS distinguish stimulation activity from cell-type-linked structure? | Pattern2 is consistent with a broad activity-like IFN program; Pattern1 and Pattern6 are more compartment-linked. | This is descriptive interpretation, not formal validation of all patterns.
+Which genes define the strongest IFN-associated pattern? | Pattern2 is anchored by canonical interferon-stimulated genes. | Enrichment analysis would strengthen the final biological claim.
+Are those genes up or down in stimulation? | Most top Pattern2 genes are up in stimulation; `FTH1` is down. | This is targeted directionality, not genome-wide differential expression.
+How does Pattern2 vary across cell types? | Pattern2 is broad but non-uniform across PBMC cell types. | Cell-type differences are descriptive unless additional donor-aware inference is added.
+
+***

@@ -1,0 +1,205 @@
+[
+  {
+    "objectID": "index.html#pbmcs-and-ifn-beta-stimulation",
+    "href": "index.html#pbmcs-and-ifn-beta-stimulation",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "PBMCs and IFN-beta stimulation",
+    "text": "PBMCs and IFN-beta stimulation\nPeripheral blood mononuclear cells are a mixture of immune cell types, including T cells, B cells, NK cells, monocytes, dendritic cells, and other populations. When PBMCs are exposed to IFN-beta, many cells are expected to activate interferon-stimulated genes. However, those cells do not stop being T cells, B cells, monocytes, or dendritic cells.\nThis means that a single-cell RNA-seq experiment contains multiple layers of structure at the same time:\n\nstable immune-cell identity\nstimulation-associated activity\ndonor and technical variation\ngene programs shared across several cell types\n\nThe dataset used here comes from a published PBMC perturbation study in which cells from eight lupus patients were profiled in control and IFN-beta stimulated conditions. The original study reported broad stimulation-associated transcriptional responses as well as cell-type-specific response structure."
+  },
+  {
+    "objectID": "index.html#why-latent-variable-analysis",
+    "href": "index.html#why-latent-variable-analysis",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Why latent-variable analysis?",
+    "text": "Why latent-variable analysis?\nClustering is useful for identifying groups of similar cells, but clustering alone can make it difficult to study biological programs shared across several cell types. A stimulation response can cut across cell-type boundaries. A latent-variable model gives us another view: instead of assigning each cell to one group, we can represent each cell as a mixture of patterns.\n\n\nIdentity-like and activity-like programs\n\n\nAn identity-like program is strongly tied to a cell type or compartment. An activity-like program reflects a biological process that can be active across multiple cell types, such as a stimulation response."
+  },
+  {
+    "objectID": "index.html#what-does-cogaps-do",
+    "href": "index.html#what-does-cogaps-do",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "What does CoGAPS do?",
+    "text": "What does CoGAPS do?\nCoGAPS is a Bayesian non-negative matrix factorization method. In this case study, we use it to decompose a genes x cells expression matrix into two linked matrices:\n\n\nCoGAPS A matrix\n\n\nThe gene-by-pattern matrix. Larger values indicate genes that contribute more strongly to a pattern.\n\n\n\n\nCoGAPS P matrix\n\n\nThe pattern-by-cell matrix. Larger values indicate cells with stronger activity for a pattern.\n\n\nIn this case study, the most important pattern is Pattern2. It is strongly associated with IFN-beta stimulation and is anchored by canonical interferon-stimulated genes. We will also inspect other patterns, but those interpretations will be more cautious."
+  },
+  {
+    "objectID": "index.html#condition-and-cell-type-summaries",
+    "href": "index.html#condition-and-cell-type-summaries",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Condition and cell-type summaries",
+    "text": "Condition and cell-type summaries\n\ncondition_counts = (\n    adata_cells.obs[\"condition\"]\n    .value_counts()\n    .rename_axis(\"condition\")\n    .reset_index(name=\"n_cells\")\n)\n\ncelltype_counts = (\n    adata_cells.obs[\"cell_type\"]\n    .value_counts()\n    .rename_axis(\"cell_type\")\n    .reset_index(name=\"n_cells\")\n)\n\ncondition_counts\n\n\n\n\n\n\n\n\ncondition\nn_cells\n\n\n\n\n0\nstim\n12358\n\n\n1\nctrl\n12315\n\n\n\n\n\n\n\n\ncelltype_counts\n\n\n\n\n\n\n\n\ncell_type\nn_cells\n\n\n\n\n0\nCD4 T cells\n11238\n\n\n1\nCD14+ Monocytes\n5697\n\n\n2\nB cells\n2651\n\n\n3\nNK cells\n1716\n\n\n4\nCD8 T cells\n1621\n\n\n5\nFCGR3A+ Monocytes\n1089\n\n\n6\nDendritic cells\n529\n\n\n7\nMegakaryocytes\n132\n\n\n\n\n\n\n\nWe can also check whether every donor or replicate has cells in both conditions.\n\npd.crosstab(adata_cells.obs[\"replicate\"], adata_cells.obs[\"condition\"])\n\n\n\n\n\n\n\ncondition\nctrl\nstim\n\n\nreplicate\n\n\n\n\n\n\npatient_101\n858\n1166\n\n\npatient_107\n517\n525\n\n\npatient_1015\n2738\n2352\n\n\npatient_1016\n1723\n1635\n\n\npatient_1039\n461\n641\n\n\npatient_1244\n1879\n1464\n\n\npatient_1256\n2108\n2026\n\n\npatient_1488\n2031\n2549"
+  },
+  {
+    "objectID": "index.html#sparsity",
+    "href": "index.html#sparsity",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Sparsity",
+    "text": "Sparsity\nSingle-cell RNA-seq matrices often contain many zeros. We can measure sparsity directly.\n\nX = adata_cells.X\nnnz = X.nnz if sparse.issparse(X) else np.count_nonzero(X)\ntotal = adata_cells.n_obs * adata_cells.n_vars\nsparsity = 1 - (nnz / total)\n\nprint(f\"Nonzero entries: {nnz:,}\")\nprint(f\"Total entries: {total:,}\")\nprint(f\"Sparsity: {sparsity:.4%}\")\n\nNonzero entries: 2,916,846\nTotal entries: 74,019,000\nSparsity: 96.0593%\n\n\nThe processed object is about 96 percent zeros. This sparse structure is one reason that we use methods designed for high-dimensional single-cell data and interpret individual genes carefully."
+  },
+  {
+    "objectID": "index.html#preparing-a-cogaps-input",
+    "href": "index.html#preparing-a-cogaps-input",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Preparing a CoGAPS input",
+    "text": "Preparing a CoGAPS input\nThe AnnData object we loaded is cells x genes. The CoGAPS input used here is genes x cells. That transpose is not just a technical detail: it determines where gene metadata and cell metadata live.\n\nif HAS_CACHED_COGAPS_INPUT:\n    cogaps_input = ad.read_h5ad(COGAPS_INPUT_H5AD)\n    cogaps_input\nelse:\n    cogaps_input = None\n    print(\"Cached dense CoGAPS input not available in this render context.\")\n    print(\"Expected genes x cells shape:\", (adata_cells.n_vars, adata_cells.n_obs))\n\nThe cached input is the default path because rebuilding the dense genes x cells matrix can take time and memory. The code below shows how it was created, but it is not evaluated by default.\n\ncogaps_input_from_cells = build_cogaps_input(adata_cells)\ncogaps_input_from_cells.write_h5ad(COGAPS_INPUT_H5AD)\n\nThe CoGAPS input should have one row per gene and one column per cell.\n\nif cogaps_input is not None:\n    assert cogaps_input.n_obs == adata_cells.n_vars\n    assert cogaps_input.n_vars == adata_cells.n_obs\n    print(\"CoGAPS input shape:\", cogaps_input.shape)\nelse:\n    print(\"Skipping dense input validation because the cached genes x cells file is absent.\")\n\nCoGAPS input shape: (3000, 24673)\n\n\n\n\nQuestion opportunity\n\n\nWhy do we need to track the transpose from cells x genes to genes x cells?\n\n\nAnswer\n\nBecause the meaning of rows and columns changes. In the cells x genes object, .obs describes cells and .var describes genes. After transposing for CoGAPS, rows are genes and columns are cells, so metadata must be tracked carefully to avoid interpreting gene weights and cell activities backward."
+  },
+  {
+    "objectID": "index.html#cell-types-by-condition",
+    "href": "index.html#cell-types-by-condition",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Cell types by condition",
+    "text": "Cell types by condition\n\ncelltype_condition = (\n    adata_cells.obs.groupby([\"cell_type\", \"condition\"], observed=True)\n    .size()\n    .reset_index(name=\"n_cells\")\n)\n\ncelltype_condition.head()\n\n\n\n\n\n\n\n\ncell_type\ncondition\nn_cells\n\n\n\n\n0\nCD4 T cells\nctrl\n5560\n\n\n1\nCD4 T cells\nstim\n5678\n\n\n2\nCD14+ Monocytes\nctrl\n2932\n\n\n3\nCD14+ Monocytes\nstim\n2765\n\n\n4\nB cells\nctrl\n1316\n\n\n\n\n\n\n\n\npivot_counts = (\n    celltype_condition\n    .pivot(index=\"cell_type\", columns=\"condition\", values=\"n_cells\")\n    .fillna(0)\n    .sort_values(by=[\"ctrl\", \"stim\"], ascending=False)\n)\n\nax = pivot_counts.plot(kind=\"bar\", figsize=(9, 4))\nax.set_ylabel(\"Number of cells\")\nax.set_xlabel(\"Cell type\")\nax.set_title(\"Cells per annotated cell type and condition\")\nplt.xticks(rotation=45, ha=\"right\")\nplt.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nThe conditions are nearly balanced overall and within major cell types. That makes it easier to compare pattern activity between control and stimulated cells, although donor-aware summaries are still important."
+  },
+  {
+    "objectID": "index.html#preview-of-the-main-cogaps-pattern",
+    "href": "index.html#preview-of-the-main-cogaps-pattern",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Preview of the main CoGAPS pattern",
+    "text": "Preview of the main CoGAPS pattern\nThe next plot was generated from the selected CoGAPS model. We will rebuild the pieces behind this interpretation in the Data Analysis section."
+  },
+  {
+    "objectID": "index.html#preview-of-pattern-gene-directionality",
+    "href": "index.html#preview-of-pattern-gene-directionality",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Preview of pattern-gene directionality",
+    "text": "Preview of pattern-gene directionality\nCoGAPS tells us which genes define a pattern. It does not directly tell us whether those genes are up or down in stimulation. For that, we performed a targeted paired pseudobulk directionality check.\n\nWe will inspect the directionality table directly in the analysis section."
+  },
+  {
+    "objectID": "index.html#why-use-k-7",
+    "href": "index.html#why-use-k-7",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Why use K = 7?",
+    "text": "Why use K = 7?\nThe full rank-selection sweep is not part of the main learner workflow. It was run beforehand as an instructor/reviewer-facing model-selection step. The selected model used K = 7, seed = 2, and n_iter = 2000.\n\nsummary_by_k = pd.read_csv(SUMMARY_BY_K_CSV)\nsummary_by_k.sort_values([\"K\", \"n_iter\"]).head(10)\n\n\n\n\n\n\n\n\nK\nn_iter\nn_ok\nifn_corr_mean\nifn_corr_std\njaccard_mean\njaccard_min\n\n\n\n\n0\n7\n2000\n5\n0.740984\n0.006944\n0.953846\n0.923077\n\n\n1\n7\n10000\n5\n0.747865\n0.002300\n0.953846\n0.923077\n\n\n2\n7\n20000\n5\n0.750558\n0.005188\n0.946003\n0.923077\n\n\n3\n9\n2000\n5\n0.710195\n0.024102\n0.681919\n0.449275\n\n\n4\n9\n10000\n5\n0.735598\n0.001711\n0.976471\n0.960784\n\n\n5\n9\n20000\n5\n0.745506\n0.008272\n0.924217\n0.851852\n\n\n6\n11\n2000\n5\n0.732560\n0.021583\n0.883516\n0.785714\n\n\n7\n11\n10000\n5\n0.702941\n0.099613\n0.799191\n0.562500\n\n\n8\n11\n20000\n5\n0.737142\n0.003894\n0.931489\n0.886792\n\n\n9\n13\n2000\n5\n0.726834\n0.021111\n0.769471\n0.639344\n\n\n\n\n\n\n\nFor the selected K = 7, n_iter = 2000 setting, the completed sweep summary showed strong IFN-pattern correlation stability and high top-gene overlap across seeds. This supports using K = 7 for the teaching workflow, but it does not prove that K = 7 is universally optimal."
+  },
+  {
+    "objectID": "index.html#load-the-chosen-cogaps-result-or-lightweight-pattern-exports",
+    "href": "index.html#load-the-chosen-cogaps-result-or-lightweight-pattern-exports",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Load the chosen CoGAPS result or lightweight pattern exports",
+    "text": "Load the chosen CoGAPS result or lightweight pattern exports\nThe default learner path loads a saved chosen model. If that large .h5ad file is unavailable, this case study falls back to lightweight exported pattern matrices and summary tables so the main interpretation steps still render cleanly.\n\nwith open(CHOSEN_METRICS_JSON) as f:\n    chosen_metrics = json.load(f)\n\nif HAS_CHOSEN_RESULT:\n    result = ad.read_h5ad(CHOSEN_RESULT_H5AD)\n    pattern_names = pattern_columns(result.obs)\n    A = result.obs[pattern_names].copy()\n    A.index.name = \"gene\"\n    P = result.var[pattern_names].copy()\n    P.index = result.var_names.astype(str)\n    P.index.name = \"cell_barcode\"\n    analysis_mode_label = \"Full chosen-model H5AD\"\nelse:\n    result = None\n    A, P = load_lightweight_pattern_matrices()\n    pattern_names = pattern_columns(A)\n    analysis_mode_label = \"Lightweight exported A/P matrices\"\n\nprint(\"Analysis mode:\", analysis_mode_label)\nprint(\"Pattern columns:\", pattern_names)\nprint(\"A matrix shape:\", A.shape)\nprint(\"P matrix shape:\", P.shape)\nprint(\"IFN-associated pattern from metrics:\", chosen_metrics[\"ifn_pattern\"])\nprint(\"IFN correlation:\", round(chosen_metrics[\"ifn_corr\"], 4))\nprint(\"Runtime in original environment, minutes:\", round(chosen_metrics[\"runtime_sec\"] / 60, 1))\n\nAnalysis mode: Full chosen-model H5AD\nPattern columns: ['Pattern1', 'Pattern2', 'Pattern3', 'Pattern4', 'Pattern5', 'Pattern6', 'Pattern7']\nA matrix shape: (3000, 7)\nP matrix shape: (24673, 7)\nIFN-associated pattern from metrics: Pattern2\nIFN correlation: 0.7485\nRuntime in original environment, minutes: 39.5\n\n\n\n\nThe saved model path is the recommended default. A local model run is useful for advanced learners, but it can take substantial time. The lightweight exports are mainly for GitHub/classroom rendering and should match the saved chosen model.\n\n\nOptional: run one single-process chosen-K model locally\n\nThe code below shows the intended local-run path. It is not evaluated by default in this draft because it can take substantial time and depends on the local PyCoGAPS installation.\n\nfrom PyCoGAPS.parameters import CoParams\nfrom PyCoGAPS.pycogaps_main import CoGAPS\n\nparams = CoParams(\n    nPatterns=CHOSEN_K,\n    nIterations=CHOSEN_ITER,\n    seed=CHOSEN_SEED,\n    useSparseOptimization=True,\n)\n\nresult = CoGAPS(str(COGAPS_INPUT_H5AD), params)"
+  },
+  {
+    "objectID": "index.html#extract-the-a-and-p-matrices",
+    "href": "index.html#extract-the-a-and-p-matrices",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Extract the A and P matrices",
+    "text": "Extract the A and P matrices\nThe chosen result stores gene weights and cell activities as pattern columns. In the saved result, result.obs contains gene weights and result.var contains cell activities. The lightweight fallback stores those same matrices as small tabular files.\n\nadata_with_patterns = adata_cells.copy()\n\nmissing_cells = adata_with_patterns.obs_names.difference(P.index)\nif len(missing_cells) &gt; 0:\n    raise ValueError(f\"Missing pattern activity values for {len(missing_cells)} cells.\")\n\nP = P.loc[adata_with_patterns.obs_names].copy()\nfor pattern in pattern_names:\n    adata_with_patterns.obs[pattern] = P[pattern].to_numpy()\n\nadata_with_patterns.obs[[\"condition\", \"cell_type\", *pattern_names]].head()\n\n\n\n\n\n\n\n\ncondition\ncell_type\nPattern1\nPattern2\nPattern3\nPattern4\nPattern5\nPattern6\nPattern7\n\n\nindex\n\n\n\n\n\n\n\n\n\n\n\n\n\nAAACATACATTTCC-1\nctrl\nCD14+ Monocytes\n0.193715\n0.000135\n0.250439\n0.575662\n0.003729\n0.331346\n0.006015\n\n\nAAACATACCAGAAA-1\nctrl\nCD14+ Monocytes\n0.146094\n0.000006\n0.106312\n0.514845\n0.100980\n0.033021\n0.000018\n\n\nAAACATACCATGCA-1\nctrl\nCD4 T cells\n0.000126\n0.000085\n0.512680\n0.000002\n0.020043\n0.000182\n0.000042\n\n\nAAACATACCTCGCT-1\nctrl\nCD14+ Monocytes\n0.048556\n0.030244\n0.157266\n0.568265\n0.000098\n0.220079\n0.000000\n\n\nAAACATACCTGGTA-1\nctrl\nDendritic cells\n0.001074\n0.054058\n0.000003\n0.116185\n0.294628\n0.534284\n0.000398"
+  },
+  {
+    "objectID": "index.html#identify-the-ifn-associated-pattern",
+    "href": "index.html#identify-the-ifn-associated-pattern",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Identify the IFN-associated pattern",
+    "text": "Identify the IFN-associated pattern\nWe identify the stimulation-associated pattern by correlating each pattern’s cell activity with a binary stimulation indicator.\n\nstim_indicator = (adata_with_patterns.obs[\"condition\"].astype(str) == STIM_LABEL).astype(int)\npattern_corrs = pd.Series(\n    {pattern: adata_with_patterns.obs[pattern].corr(stim_indicator) for pattern in pattern_names},\n    name=\"corr_with_stim\",\n).sort_values(ascending=False)\n\npattern_corrs\n\nPattern2    0.748491\nPattern7    0.368084\nPattern6    0.002746\nPattern1   -0.022635\nPattern3   -0.105255\nPattern5   -0.126081\nPattern4   -0.261200\nName: corr_with_stim, dtype: float64\n\n\nPattern2 is the strongest IFN-associated pattern in this chosen model.\nIf a cached lightweight correlation table is available, we can confirm that it matches the current render context.\n\nif HAS_PATTERN_CORRELATIONS:\n    cached_pattern_corrs = pd.read_csv(PATTERN_CORRELATIONS_CSV)\n    corr_check = (\n        cached_pattern_corrs.set_index(\"pattern\")[\"corr_with_stim\"]\n        .reindex(pattern_corrs.index)\n        .subtract(pattern_corrs)\n        .abs()\n        .max()\n    )\n    print(\"Max absolute difference from cached pattern_correlations.csv:\", round(float(corr_check), 10))\nelse:\n    print(\"Cached pattern_correlations.csv not available.\")\n\nMax absolute difference from cached pattern_correlations.csv: 0.0"
+  },
+  {
+    "objectID": "index.html#inspect-top-genes-for-pattern2",
+    "href": "index.html#inspect-top-genes-for-pattern2",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Inspect top genes for Pattern2",
+    "text": "Inspect top genes for Pattern2\n\npattern2_top_genes = top_genes_from_matrix(A, \"Pattern2\", n=15)\npattern2_top_genes\n\n\n\n\n\n\n\n\ngene\nweight\n\n\n\n\n0\nISG15\n9.908002\n\n\n1\nISG20\n8.472368\n\n\n2\nIFI6\n6.688204\n\n\n3\nIFIT3\n4.989565\n\n\n4\nLY6E\n4.590168\n\n\n5\nIFIT1\n4.066503\n\n\n6\nMX1\n3.913702\n\n\n7\nFTH1\n2.225061\n\n\n8\nIFIT2\n1.620791\n\n\n9\nIRF7\n1.552124\n\n\n10\nSAT1\n1.540814\n\n\n11\nTNFSF10\n1.419751\n\n\n12\nOAS1\n1.360103\n\n\n13\nPLSCR1\n1.190072\n\n\n14\nBST2\n1.088664\n\n\n\n\n\n\n\nThe top Pattern2 genes include canonical interferon-stimulated genes such as ISG15, ISG20, IFI6, IFIT3, IFIT1, MX1, IFIT2, IRF7, OAS1, PLSCR1, and BST2. This supports interpreting Pattern2 as an IFN-associated program.\nHowever, pattern weights alone do not tell us whether those genes are up or down in stimulated cells.\n\n\nQuestion opportunity\n\n\nIf a gene has a high CoGAPS weight in a pattern, does that mean it is up-regulated in stimulated cells?\n\n\nAnswer\n\nNo. A high CoGAPS weight means the gene helps define the pattern. To determine up- or down-regulation, we compare expression between conditions using the count data or normalized expression summaries."
+  },
+  {
+    "objectID": "index.html#add-directionality-for-pattern2-genes",
+    "href": "index.html#add-directionality-for-pattern2-genes",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Add directionality for Pattern2 genes",
+    "text": "Add directionality for Pattern2 genes\nWe answer the directionality question using a targeted paired pseudobulk analysis. The directionality table was generated from raw counts in .layers[\"counts\"] by aggregating cells within donor and condition, computing log2(stim CPM + 0.5) - log2(ctrl CPM + 0.5), and summarizing across donors.\n\ndirection_global = pd.read_csv(DIRECTION_GLOBAL_CSV)\n\npattern2_direction = (\n    direction_global.loc[direction_global[\"pattern\"] == \"Pattern2\"]\n    .sort_values(\"rank\")\n    [[\n        \"rank\",\n        \"gene\",\n        \"mean_log2fc_stim_vs_ctrl\",\n        \"n_up_pairs\",\n        \"n_down_pairs\",\n        \"wilcoxon_fdr\",\n        \"direction\",\n        \"evidence_strength\",\n    ]]\n)\n\npattern2_direction\n\n\n\n\n\n\n\n\nrank\ngene\nmean_log2fc_stim_vs_ctrl\nn_up_pairs\nn_down_pairs\nwilcoxon_fdr\ndirection\nevidence_strength\n\n\n\n\n15\n1\nISG15\n6.173216\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n16\n2\nISG20\n3.668504\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n17\n3\nIFI6\n4.688122\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n18\n4\nIFIT3\n6.394614\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n19\n5\nLY6E\n4.183286\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n20\n6\nIFIT1\n7.416023\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n21\n7\nMX1\n4.937975\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n22\n8\nFTH1\n-1.080925\n0\n8\n0.009581\ndown_in_stim\nstrong\n\n\n23\n9\nIFIT2\n6.390504\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n24\n10\nIRF7\n2.958523\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n25\n11\nSAT1\n1.369810\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n26\n12\nTNFSF10\n5.049336\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n27\n13\nOAS1\n3.962388\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n28\n14\nPLSCR1\n2.671636\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n29\n15\nBST2\n2.028792\n8\n0\n0.009581\nup_in_stim\nstrong\n\n\n\n\n\n\n\nIn the current directionality analysis, 14 of the top 15 Pattern2 genes are up in IFN-beta stimulation. FTH1 is the exception and is down in stimulation. This distinction matters: FTH1 contributes to the pattern, but it should not be described as an up-regulated IFN-stimulated gene in this dataset."
+  },
+  {
+    "objectID": "index.html#summarize-all-patterns",
+    "href": "index.html#summarize-all-patterns",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Summarize all patterns",
+    "text": "Summarize all patterns\n\nif HAS_PATTERN_SUMMARY:\n    pattern_summary = pd.read_csv(PATTERN_SUMMARY_CSV)\nelse:\n    pattern_summary_rows = []\n    for pattern in pattern_names:\n        top_genes = \", \".join(top_genes_from_matrix(A, pattern, n=8)[\"gene\"].tolist())\n        dominant_cell_type = (\n            adata_with_patterns.obs.groupby(\"cell_type\", observed=True)[pattern]\n            .mean()\n            .sort_values(ascending=False)\n            .index[0]\n        )\n        pattern_summary_rows.append(\n            {\n                \"pattern\": pattern,\n                \"corr_with_stim\": round(float(pattern_corrs[pattern]), 4),\n                \"dominant_cell_type\": dominant_cell_type,\n                \"top_genes_top8\": top_genes,\n            }\n        )\n    pattern_summary = pd.DataFrame(pattern_summary_rows)\n\npattern_summary\n\n\n\n\n\n\n\n\npattern\ncorr_with_stim\ndominant_cell_type\ndominant_cell_type_mean_activity\nmean_activity_ctrl\nmean_activity_stim\ntop_genes_top8\ntop_genes_top15\n\n\n\n\n0\nPattern2\n0.748491\nFCGR3A+ Monocytes\n0.219118\n0.010912\n0.290822\nISG15, ISG20, IFI6, IFIT3, LY6E, IFIT1, MX1, FTH1\nISG15, ISG20, IFI6, IFIT3, LY6E, IFIT1, MX1, F...\n\n\n1\nPattern7\n0.368084\nCD14+ Monocytes\n0.237724\n0.002751\n0.132299\nCXCL10, ISG15, APOBEC3A, IFITM3, RSAD2, TNFSF1...\nCXCL10, ISG15, APOBEC3A, IFITM3, RSAD2, TNFSF1...\n\n\n2\nPattern6\n0.002746\nDendritic cells\n0.516030\n0.063257\n0.063865\nCD74, HLA-DRA, HLA-DRB1, HLA-DPA1, HLA-DPB1, F...\nCD74, HLA-DRA, HLA-DRB1, HLA-DPA1, HLA-DPB1, F...\n\n\n3\nPattern1\n-0.022635\nFCGR3A+ Monocytes\n0.515387\n0.046613\n0.041320\nTIMP1, FTH1, SOD2, MS4A7, S100A11, TYROBP, FCG...\nTIMP1, FTH1, SOD2, MS4A7, S100A11, TYROBP, FCG...\n\n\n4\nPattern3\n-0.105255\nCD8 T cells\n0.379217\n0.260408\n0.214709\nFTH1, FTL, ANXA1, SH3BGRL3, GAPDH, S100A11, S1...\nFTH1, FTL, ANXA1, SH3BGRL3, GAPDH, S100A11, S1...\n\n\n5\nPattern5\n-0.126081\nCD4 T cells\n0.212411\n0.167571\n0.133081\nFTH1, ACTB, PFN1, CCR7, VIM, HSPA8, LTB, EMP3\nFTH1, ACTB, PFN1, CCR7, VIM, HSPA8, LTB, EMP3,...\n\n\n6\nPattern4\n-0.261200\nCD14+ Monocytes\n0.315996\n0.130569\n0.041077\nFTH1, TIMP1, FTL, CD63, S100A10, ACTB, S100A11...\nFTH1, TIMP1, FTL, CD63, S100A10, ACTB, S100A11...\n\n\n\n\n\n\n\nPattern7 is also stimulation-associated and includes genes such as CXCL10, APOBEC3A, RSAD2, TNFSF10, IDO1, and several interferon-stimulated genes. We interpret Pattern7 as a secondary stimulation-associated candidate, not as a fully validated distinct biological program.\nPattern1 has myeloid anchors such as MS4A7, TYROBP, FCGR3A, FCER1G, and CTSS. Pattern6 includes antigen-presentation genes such as CD74, HLA-DRA, HLA-DRB1, HLA-DPA1, HLA-DPB1, and HLA-DQA1. These patterns are useful context for identity-like or compartment-linked structure, but their biological labels should remain cautious."
+  },
+  {
+    "objectID": "index.html#pattern2-across-cell-types",
+    "href": "index.html#pattern2-across-cell-types",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Pattern2 across cell types",
+    "text": "Pattern2 across cell types\n\nif HAS_PATTERN_ACTIVITY_BY_CELLTYPE:\n    pattern2_by_celltype = (\n        pd.read_csv(PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)\n        .loc[lambda df: df[\"pattern\"] == \"Pattern2\"]\n        .sort_values([\"cell_type\", \"condition\"])\n    )\nelse:\n    pattern2_by_celltype = (\n        adata_with_patterns.obs.groupby([\"cell_type\", \"condition\"], observed=True)[\"Pattern2\"]\n        .agg([\"mean\", \"median\", \"count\"])\n        .reset_index()\n        .rename(columns={\"mean\": \"mean_activity\", \"median\": \"median_activity\", \"count\": \"n_cells\"})\n        .sort_values([\"cell_type\", \"condition\"])\n    )\n\npattern2_by_celltype\n\n\n\n\n\n\n\n\npattern\ncell_type\ncondition\nmean_activity\nmedian_activity\nn_cells\n\n\n\n\n20\nPattern2\nB cells\nctrl\n0.009475\n0.000343\n1316\n\n\n21\nPattern2\nB cells\nstim\n0.397932\n0.405662\n1335\n\n\n18\nPattern2\nCD14+ Monocytes\nctrl\n0.011971\n0.000087\n2932\n\n\n19\nPattern2\nCD14+ Monocytes\nstim\n0.163977\n0.149365\n2765\n\n\n16\nPattern2\nCD4 T cells\nctrl\n0.007382\n0.000249\n5560\n\n\n17\nPattern2\nCD4 T cells\nstim\n0.296699\n0.284561\n5678\n\n\n24\nPattern2\nCD8 T cells\nctrl\n0.009428\n0.000259\n811\n\n\n25\nPattern2\nCD8 T cells\nstim\n0.317977\n0.295428\n810\n\n\n28\nPattern2\nDendritic cells\nctrl\n0.016098\n0.000125\n258\n\n\n29\nPattern2\nDendritic cells\nstim\n0.373331\n0.382696\n271\n\n\n26\nPattern2\nFCGR3A+ Monocytes\nctrl\n0.037828\n0.002358\n520\n\n\n27\nPattern2\nFCGR3A+ Monocytes\nstim\n0.384795\n0.403027\n569\n\n\n30\nPattern2\nMegakaryocytes\nctrl\n0.003417\n0.000172\n63\n\n\n31\nPattern2\nMegakaryocytes\nstim\n0.049425\n0.000702\n69\n\n\n22\nPattern2\nNK cells\nctrl\n0.016468\n0.001269\n855\n\n\n23\nPattern2\nNK cells\nstim\n0.399063\n0.412704\n861\n\n\n\n\n\n\n\n\nplot_df = pattern2_by_celltype.pivot(index=\"cell_type\", columns=\"condition\", values=\"mean_activity\")\nplot_df = plot_df.sort_values(by=STIM_LABEL, ascending=False)\n\nax = plot_df.plot(kind=\"bar\", figsize=(9, 4))\nax.set_ylabel(\"Mean Pattern2 activity\")\nax.set_xlabel(\"Cell type\")\nax.set_title(\"Mean Pattern2 activity by cell type and condition\")\nplt.xticks(rotation=45, ha=\"right\")\nplt.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nPattern2 activity is broad across PBMC cell types but not uniform. This supports an activity-like interpretation: the pattern is not simply a marker of one immune cell type."
+  },
+  {
+    "objectID": "index.html#directionality-across-cell-types",
+    "href": "index.html#directionality-across-cell-types",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Directionality across cell types",
+    "text": "Directionality across cell types\n\ndirection_celltype = pd.read_csv(DIRECTION_CELLTYPE_CSV)\n\npattern2_celltype_direction = (\n    direction_celltype.loc[direction_celltype[\"pattern\"] == \"Pattern2\"]\n    .groupby([\"cell_type\", \"direction\"], observed=True)\n    .size()\n    .unstack(fill_value=0)\n    .reset_index()\n)\n\npattern2_celltype_direction\n\n\n\n\n\n\n\ndirection\ncell_type\ndown_in_stim\nup_in_stim\n\n\n\n\n0\nB cells\n1\n14\n\n\n1\nCD14+ Monocytes\n1\n14\n\n\n2\nCD4 T cells\n1\n14\n\n\n3\nCD8 T cells\n1\n14\n\n\n4\nDendritic cells\n1\n14\n\n\n5\nFCGR3A+ Monocytes\n1\n14\n\n\n6\nMegakaryocytes\n1\n14\n\n\n7\nNK cells\n1\n14\n\n\n\n\n\n\n\nIn each annotated cell type, 14 of the top 15 Pattern2 genes are up in stimulation under the targeted pseudobulk summary, while FTH1 is down. This reinforces the interpretation that Pattern2 captures a broad IFN-beta response, while also reminding us that the analysis is targeted and descriptive."
+  },
+  {
+    "objectID": "index.html#synopsis",
+    "href": "index.html#synopsis",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Synopsis",
+    "text": "Synopsis\n\nIn this case study, we used a processed PBMC single-cell RNA-seq dataset with control and IFN-beta stimulated cells to learn how a latent-variable method can reveal transcriptional programs that cut across cell-type labels.\nWe inspected the AnnData object, summarized condition and cell-type metadata, prepared a genes x cells CoGAPS input, and loaded a saved chosen CoGAPS model. The rank K = 7 was selected before the main learner workflow using a limited model-selection sweep. Learners do not need to run that sweep to complete the case study.\nThe strongest stimulation-associated program in the chosen model is Pattern2. Pattern2 is anchored by canonical interferon-stimulated genes, including ISG15, ISG20, IFI6, IFIT3, IFIT1, MX1, IFIT2, IRF7, OAS1, PLSCR1, and BST2.\nWe also performed a targeted directionality check because CoGAPS pattern weights do not by themselves indicate whether genes are up or down in stimulation. In that analysis, 14 of the top 15 Pattern2 genes were up in IFN-beta stimulation, while FTH1 was down.\nPattern2 activity appears broad across PBMC cell types, supporting an activity-like IFN-response interpretation. Other patterns have interpretable gene anchors, such as myeloid and antigen-presentation genes, but those secondary interpretations should remain more cautious."
+  },
+  {
+    "objectID": "index.html#summary-plot",
+    "href": "index.html#summary-plot",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Summary Plot",
+    "text": "Summary Plot"
+  },
+  {
+    "objectID": "index.html#main-questions-revisited",
+    "href": "index.html#main-questions-revisited",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Main Questions Revisited",
+    "text": "Main Questions Revisited\n\n\n\n\n\n\n\n\n\nQuestion\nCurrent answer\nCaveat\n\n\n\n\nWhat latent transcriptional programs are present?\nThe chosen K = 7 model contains seven patterns, including a strong IFN-associated pattern and several compartment-linked candidates.\nNot every pattern has a settled biological label.\n\n\nCan CoGAPS distinguish stimulation activity from cell-type-linked structure?\nPattern2 is consistent with a broad activity-like IFN program; Pattern1 and Pattern6 are more compartment-linked.\nThis is descriptive interpretation, not formal validation of all patterns.\n\n\nWhich genes define the strongest IFN-associated pattern?\nPattern2 is anchored by canonical interferon-stimulated genes.\nEnrichment analysis would strengthen the final biological claim.\n\n\nAre those genes up or down in stimulation?\nMost top Pattern2 genes are up in stimulation; FTH1 is down.\nThis is targeted directionality, not genome-wide differential expression.\n\n\nHow does Pattern2 vary across cell types?\nPattern2 is broad but non-uniform across PBMC cell types.\nCell-type differences are descriptive unless additional donor-aware inference is added."
+  },
+  {
+    "objectID": "index.html#helpful-links",
+    "href": "index.html#helpful-links",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Helpful Links",
+    "text": "Helpful Links\n\nTerms and concepts covered:\n\nAnnData\nPBMC\nIFN-beta\ninterferon-stimulated gene\nlatent variable\nnon-negative matrix factorization\nCoGAPS\nA matrix\nP matrix\npseudobulk\nlog2 fold-change\n\nPackages used in this case study:\n\nanndata\npandas\nnumpy\nscipy\nmatplotlib\nPyCoGAPS"
+  },
+  {
+    "objectID": "index.html#optional-hpc-appendix-how-k-7-was-selected",
+    "href": "index.html#optional-hpc-appendix-how-k-7-was-selected",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Optional HPC Appendix: How K = 7 Was Selected",
+    "text": "Optional HPC Appendix: How K = 7 Was Selected\n\nThis section is for instructors and advanced users. Learners do not need to run the sweep to complete the case study.\nThe main analysis uses a saved K = 7 CoGAPS result. The choice of K = 7 was supported by a limited sweep over multiple ranks, seeds, and iteration counts. The sweep evaluated IFN-pattern correlation and top-gene overlap stability, then selected the smallest stable K under the local selection rule.\nThe final teaching workflow uses:\n\nK = 7\nseed = 2\nn_iter = 2000\none non-distributed chosen-model result"
+  },
+  {
+    "objectID": "index.html#sweep-summary",
+    "href": "index.html#sweep-summary",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Sweep summary",
+    "text": "Sweep summary\n\nsummary_by_k = pd.read_csv(SUMMARY_BY_K_CSV)\nsummary_by_k.sort_values([\"K\", \"n_iter\"])\n\n\n\n\n\n\n\n\nK\nn_iter\nn_ok\nifn_corr_mean\nifn_corr_std\njaccard_mean\njaccard_min\n\n\n\n\n0\n7\n2000\n5\n0.740984\n0.006944\n0.953846\n0.923077\n\n\n1\n7\n10000\n5\n0.747865\n0.002300\n0.953846\n0.923077\n\n\n2\n7\n20000\n5\n0.750558\n0.005188\n0.946003\n0.923077\n\n\n3\n9\n2000\n5\n0.710195\n0.024102\n0.681919\n0.449275\n\n\n4\n9\n10000\n5\n0.735598\n0.001711\n0.976471\n0.960784\n\n\n5\n9\n20000\n5\n0.745506\n0.008272\n0.924217\n0.851852\n\n\n6\n11\n2000\n5\n0.732560\n0.021583\n0.883516\n0.785714\n\n\n7\n11\n10000\n5\n0.702941\n0.099613\n0.799191\n0.562500\n\n\n8\n11\n20000\n5\n0.737142\n0.003894\n0.931489\n0.886792\n\n\n9\n13\n2000\n5\n0.726834\n0.021111\n0.769471\n0.639344\n\n\n10\n13\n10000\n5\n0.713791\n0.021231\n0.819098\n0.724138\n\n\n\n\n\n\n\nFor K = 7, n_iter = 2000, the available sweep summary has strong IFN-correlation stability and high top-gene overlap. The selected setting should be described as the best choice under this local sweep rule, not as a universal optimum."
+  },
+  {
+    "objectID": "index.html#optional-command-line-workflow",
+    "href": "index.html#optional-command-line-workflow",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Optional command-line workflow",
+    "text": "Optional command-line workflow\nThe original project used SLURM scripts and helper Python scripts. These scripts are preserved in the source analysis folder and selected scripts are copied into this draft under scripts/ for provenance.\n# Generate jobs table\npython make_cogaps_jobs_tsv.py\n\n# Prepare cached inputs and jobs on a cluster\nsbatch prep_cogaps_cache_and_jobs_rhino_light.sbatch\n\n# Run the array sweep\nsbatch cogaps_sweep_array_singleprocess_rhino_light.sbatch\n\n# Aggregate sweep results\nsbatch aggregate_cogaps_results_rhino_light.sbatch\nThis is cluster-specific workflow provenance. It is not intended to be a turnkey cross-cluster deployment guide."
+  },
+  {
+    "objectID": "index.html#figures-for-model-selection-context",
+    "href": "index.html#figures-for-model-selection-context",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Figures for model-selection context",
+    "text": "Figures for model-selection context"
+  },
+  {
+    "objectID": "index.html#directionality-analysis-provenance",
+    "href": "index.html#directionality-analysis-provenance",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Directionality analysis provenance",
+    "text": "Directionality analysis provenance\nThe directionality analysis used in the main case study was generated with:\n\nscripts/pattern_directionality_analysis.py\ndata/results/pattern_gene_directionality_global.csv\ndata/results/pattern_gene_directionality_by_celltype.csv\ndata/results/pattern_direction_summary.csv\n\nIt is a targeted analysis of top CoGAPS pattern genes, not a genome-wide differential-expression analysis."
+  },
+  {
+    "objectID": "index.html#session-info",
+    "href": "index.html#session-info",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Session Info",
+    "text": "Session Info\n\n\nimport platform\nimport sys\n\nprint(\"Python:\", sys.version)\nprint(\"Platform:\", platform.platform())\n\nfor package_name in [\"anndata\", \"pandas\", \"numpy\", \"scipy\", \"matplotlib\"]:\n    module = __import__(package_name)\n    print(package_name, getattr(module, \"__version__\", \"unknown\"))\n\nPython: 3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:34:53) [Clang 19.1.7 ]\nPlatform: macOS-15.7.1-arm64-arm-64bit\nanndata 0.12.10\npandas 2.3.3\nnumpy 2.4.4\nscipy 1.17.1\nmatplotlib 3.10.8"
+  },
+  {
+    "objectID": "index.html#acknowledgments",
+    "href": "index.html#acknowledgments",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Acknowledgments",
+    "text": "Acknowledgments\n\nWe would like to acknowledge the National Institute of General Medical Sciences for funding this work (1R25GM160622).\nThis draft case study uses public PBMC IFN-beta stimulation single-cell RNA-seq data from Kang et al. and builds on the CoGAPS and scCoGAPS method literature. The case-study structure is based on the Biomedical Open Case Studies Quarto template and OTTR infrastructure.\nIcons are from iconpacks."
+  }
+]

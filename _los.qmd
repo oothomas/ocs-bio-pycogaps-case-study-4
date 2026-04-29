@@ -1,0 +1,20 @@
+# **Learning Objectives**
+***
+
+In this case study, we will use a processed single-cell RNA-seq dataset from PBMCs exposed to IFN-beta stimulation to learn how latent-variable methods can identify gene-expression programs that are not captured by cell-type labels alone.
+
+We will load and inspect an AnnData object, prepare a CoGAPS input matrix, use a previously selected `K = 7` model, interpret pattern activities and gene weights, and perform a targeted directionality check for genes that define the main pattern.
+
+The skills, methods, and concepts that students will be familiar with by the end of this case study are:
+
+{{< include _data_science_los.qmd >}}
+
+::: {.content-hidden unless-meta="include-sections.stat-los"}
+
+{{< include _statistical_los.qmd >}}
+
+:::
+
+{{< include _biological_los.qmd >}}
+
+***

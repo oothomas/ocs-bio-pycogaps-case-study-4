@@ -1,0 +1,10 @@
+:::{.reference_box}
+::::{.reference_box_header}
+To cite this case study, please use:
+::::
+::::{.inner_block}
+{Authors to be finalized}. {(YEAR)}. Finding latent immune-response programs in single-cell RNA-seq with CoGAPS. {Final GitHub source URL}. {Version}.
+::::
+:::
+
+This draft case study uses the PBMC IFN-beta stimulation single-cell RNA-seq dataset from Kang et al. and introduces CoGAPS using the CoGAPS and scCoGAPS method literature. Full citation metadata should be finalized before publication.

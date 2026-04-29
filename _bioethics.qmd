@@ -1,0 +1,13 @@
+# **Ethical Considerations**
+***
+
+There are some important ethical considerations when working with data relating to this case study's main questions.
+
+1. These data come from human immune cells, so learners should treat donor metadata carefully even when the dataset is public and de-identified.
+1. Public case-study repositories should not include protected health information or unnecessary sensitive metadata.
+1. Reproducible workflows improve transparency, but they also make it important to document what data were processed, subset, or cached.
+1. This case study is educational and should not be used for clinical decision-making.
+
+The processed files in this draft project use donor or patient replicate labels only for analysis structure. We will not attempt to infer private donor attributes from these labels.
+
+***

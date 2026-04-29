@@ -1,0 +1,40 @@
+# **Data Import**
+***
+
+We will start from a cached processed AnnData object. This keeps the focus of the case study on latent-variable analysis and interpretation rather than on rebuilding every preprocessing step from the original source files.
+
+```{python}
+adata_cells = ad.read_h5ad(PREPROCESSED_H5AD)
+adata_cells
+```
+
+We need three metadata columns for the rest of the case study:
+
+1. `condition`, so we can compare control and IFN-beta stimulated cells
+1. `cell_type`, so we can summarize patterns across immune compartments
+1. `replicate`, so we can perform paired donor-aware summaries
+
+```{python}
+required_obs = {"condition", "cell_type", "replicate"}
+missing_obs = required_obs.difference(adata_cells.obs.columns)
+
+if missing_obs:
+    raise ValueError(f"Missing required metadata columns: {sorted(missing_obs)}")
+
+adata_cells.obs[["condition", "cell_type", "replicate"]].head()
+```
+
+The default path in this case study uses a saved chosen CoGAPS model. We check that it is available now and interpret it later.
+
+```{python}
+print("Analysis mode:", ANALYSIS_MODE)
+print("Saved chosen model available:", HAS_CHOSEN_RESULT)
+print("Cached dense CoGAPS input available:", HAS_CACHED_COGAPS_INPUT)
+print("Chosen model metrics available:", CHOSEN_METRICS_JSON.exists())
+print("Lightweight pattern matrices available:", HAS_LIGHTWEIGHT_PATTERN_MATRICES)
+print("Lightweight pattern summary available:", HAS_PATTERN_SUMMARY)
+```
+
+If the full chosen-model `.h5ad` file is not available, the case study falls back to lightweight exported pattern matrices and summary tables. That lightweight path is intended to keep GitHub and classroom renders informative without requiring the 600 MB result object.
+
+***

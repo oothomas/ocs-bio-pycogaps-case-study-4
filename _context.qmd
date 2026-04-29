@@ -1,0 +1,54 @@
+# **Context**
+***
+
+## PBMCs and IFN-beta stimulation
+
+Peripheral blood mononuclear cells are a mixture of immune cell types, including T cells, B cells, NK cells, monocytes, dendritic cells, and other populations. When PBMCs are exposed to IFN-beta, many cells are expected to activate interferon-stimulated genes. However, those cells do not stop being T cells, B cells, monocytes, or dendritic cells.
+
+This means that a single-cell RNA-seq experiment contains multiple layers of structure at the same time:
+
+1. stable immune-cell identity
+1. stimulation-associated activity
+1. donor and technical variation
+1. gene programs shared across several cell types
+
+The dataset used here comes from a published PBMC perturbation study in which cells from eight lupus patients were profiled in control and IFN-beta stimulated conditions. The original study reported broad stimulation-associated transcriptional responses as well as cell-type-specific response structure.
+
+## Why latent-variable analysis?
+
+Clustering is useful for identifying groups of similar cells, but clustering alone can make it difficult to study biological programs shared across several cell types. A stimulation response can cut across cell-type boundaries. A latent-variable model gives us another view: instead of assigning each cell to one group, we can represent each cell as a mixture of patterns.
+
+:::{.definition_box}
+::::{.definition_box_header}
+Identity-like and activity-like programs
+::::
+::::{.inner_block}
+An identity-like program is strongly tied to a cell type or compartment. An activity-like program reflects a biological process that can be active across multiple cell types, such as a stimulation response.
+::::
+:::
+
+## What does CoGAPS do?
+
+CoGAPS is a Bayesian non-negative matrix factorization method. In this case study, we use it to decompose a genes x cells expression matrix into two linked matrices:
+
+:::{.definition_box}
+::::{.definition_box_header}
+CoGAPS `A` matrix
+::::
+::::{.inner_block}
+The gene-by-pattern matrix. Larger values indicate genes that contribute more strongly to a pattern.
+::::
+:::
+
+:::{.definition_box}
+::::{.definition_box_header}
+CoGAPS `P` matrix
+::::
+::::{.inner_block}
+The pattern-by-cell matrix. Larger values indicate cells with stronger activity for a pattern.
+::::
+:::
+
+In this case study, the most important pattern is Pattern2. It is strongly associated with IFN-beta stimulation and is anchored by canonical interferon-stimulated genes. We will also inspect other patterns, but those interpretations will be more cautious.
+
+***

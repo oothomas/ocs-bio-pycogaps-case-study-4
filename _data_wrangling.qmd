@@ -1,0 +1,58 @@
+# **Data Wrangling**
+***
+
+The processed AnnData object was generated before this case study. The frozen preprocessing steps include filtering genes by minimum cell count, library-size normalization, log transformation, and selection of 3,000 highly variable genes.
+
+```{python}
+with open(PREPROCESS_CONFIG_JSON) as f:
+    preprocess_config = json.load(f)
+
+preprocess_config
+```
+
+## Preparing a CoGAPS input
+
+The AnnData object we loaded is cells x genes. The CoGAPS input used here is genes x cells. That transpose is not just a technical detail: it determines where gene metadata and cell metadata live.
+
+```{python}
+if HAS_CACHED_COGAPS_INPUT:
+    cogaps_input = ad.read_h5ad(COGAPS_INPUT_H5AD)
+    cogaps_input
+else:
+    cogaps_input = None
+    print("Cached dense CoGAPS input not available in this render context.")
+    print("Expected genes x cells shape:", (adata_cells.n_vars, adata_cells.n_obs))
+```
+
+The cached input is the default path because rebuilding the dense genes x cells matrix can take time and memory. The code below shows how it was created, but it is not evaluated by default.
+
+```{python}
+#| eval: false
+cogaps_input_from_cells = build_cogaps_input(adata_cells)
+cogaps_input_from_cells.write_h5ad(COGAPS_INPUT_H5AD)
+```
+
+The CoGAPS input should have one row per gene and one column per cell.
+
+```{python}
+if cogaps_input is not None:
+    assert cogaps_input.n_obs == adata_cells.n_vars
+    assert cogaps_input.n_vars == adata_cells.n_obs
+    print("CoGAPS input shape:", cogaps_input.shape)
+else:
+    print("Skipping dense input validation because the cached genes x cells file is absent.")
+```
+
+:::{.think_question}
+::::{.think_question_header}
+Question opportunity
+::::
+::::{.inner_block}
+Why do we need to track the transpose from cells x genes to genes x cells?
+<details><summary>Answer</summary>
+Because the meaning of rows and columns changes. In the cells x genes object, `.obs` describes cells and `.var` describes genes. After transposing for CoGAPS, rows are genes and columns are cells, so metadata must be tracked carefully to avoid interpreting gene weights and cell activities backward.
+</details>
+::::
+:::
+
+***
