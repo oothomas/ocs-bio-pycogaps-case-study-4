@@ -20,7 +20,7 @@ This work is funded through the National Institutes of Health, specifically the 
 
 ---
 
-To access the GitHub repository for this case study see here: [case study source repository to be finalized](https://github.com/opencasestudies/ocs-bio-pycogaps){target="_blank"}.
+To access the GitHub repository for this case study, see [oothomas/ocs-bio-pycogaps-case-study-4](https://github.com/oothomas/ocs-bio-pycogaps-case-study-4){target="_blank"}.
 
 The draft data files included with this first-pass project are cached analysis objects and results derived from a processed PBMC single-cell RNA-seq dataset. The default learner path uses these cached files:
 
