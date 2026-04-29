@@ -10,9 +10,9 @@ This is not yet a publication-ready case study. It is a full first draft intende
 
 Known items to finalize:
 
-- final repository URL
+- repository landing page and public documentation polish for `https://github.com/oothomas/ocs-bio-pycogaps-case-study-4`
 - author list and citation text
-- package/environment instructions
+- package/environment instructions beyond the current runtime image `othomas2/pycogaps-runtime-guide:0.1.0`
 - whether saved data files should remain committed or be distributed separately
 - final decision about mentioning dengue in the motivation
 - optional enrichment analysis for Pattern2 and Pattern7
