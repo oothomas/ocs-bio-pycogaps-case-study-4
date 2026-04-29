@@ -2,16 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS – Biomedical Open Case Studies</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -24,9 +21,8 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -37,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -61,28 +57,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./assets/Bio-OCS_Logo.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-428b9cd7e1507f148d0c9a0abc5a1f05.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-428b9cd7e1507f148d0c9a0abc5a1f05.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-428b9cd7e1507f148d0c9a0abc5a1f05.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -122,7 +112,7 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 </script>
-<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
@@ -130,17 +120,13 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating nav-fixed slimcontent quarto-light">
+<body class="nav-sidebar floating nav-fixed slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="./index.html" class="navbar-brand navbar-brand-logo">
-    <img src="./assets/Bio-OCS_Logo.png" alt="" class="navbar-logo light-content">
-    <img src="./assets/Bio-OCS_Logo.png" alt="" class="navbar-logo dark-content">
-    </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Biomedical Open Case Studies</span>
     </a>
@@ -179,8 +165,7 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
       <a href="https://www.opencasestudies.org/" class="sidebar-logo-link">
-      <img src="./assets/Bio-OCS_Logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
-      <img src="./assets/Bio-OCS_Logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      <img src="./assets/Bio-OCS_Logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
       </a>
       </div>
     <nav id="TOC" role="doc-toc" class="toc-active">
@@ -299,7 +284,7 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 </div>
 <p>This work is funded through the National Institutes of Health, specifically the National Institute of General Medical Sciences: Grant Number 1R25GM160622.</p>
 <hr>
-<p>To access the GitHub repository for this case study see here: <a href="https://github.com/opencasestudies/ocs-bio-pycogaps" target="_blank">case study source repository to be finalized</a>.</p>
+<p>To access the GitHub repository for this case study, see <a href="https://github.com/oothomas/ocs-bio-pycogaps-case-study-4" target="_blank">oothomas/ocs-bio-pycogaps-case-study-4</a>.</p>
 <p>The draft data files included with this first-pass project are cached analysis objects and results derived from a processed PBMC single-cell RNA-seq dataset. The default learner path uses these cached files:</p>
 <table class="caption-top table">
 <colgroup>
@@ -435,8 +420,8 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 <h1><strong>Packages</strong></h1>
 <hr>
 <p>We will begin by loading the Python packages that we need for this case study.</p>
-<div id="319496d9" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> __future__ <span class="im">import</span> annotations</span>
+<div id="23f54fc8" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> __future__ <span class="im">import</span> annotations</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
@@ -447,7 +432,7 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> sparse</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> sparse</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <table class="caption-top table">
 <thead>
@@ -484,8 +469,8 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 </tbody>
 </table>
 <p>We will also define paths and helper functions that will be reused across sections.</p>
-<div id="e4ef34a4" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_project_root(start: Path) <span class="op">-&gt;</span> Path:</span>
+<div id="4dfd8903" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_project_root(start: Path) <span class="op">-&gt;</span> Path:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> path <span class="kw">in</span> [start, <span class="op">*</span>start.parents]:</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (path <span class="op">/</span> <span class="st">"index.qmd"</span>).exists() <span class="kw">and</span> (path <span class="op">/</span> <span class="st">"data"</span>).exists():</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> path</span>
@@ -535,10 +520,10 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 <span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"lightweight_derived"</span></span>
 <span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_LIGHTWEIGHT_PATTERN_MATRICES</span>
 <span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"unavailable"</span></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="8b8f2eb8" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pattern_columns(df: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<div id="0d02f4a9" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pattern_columns(df: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>(</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        [c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> <span class="bu">str</span>(c).startswith(<span class="st">"Pattern"</span>)],</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        key<span class="op">=</span><span class="kw">lambda</span> value: <span class="bu">int</span>(<span class="bu">str</span>(value).replace(<span class="st">"Pattern"</span>, <span class="st">""</span>)),</span>
@@ -566,7 +551,7 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    cogaps_input.var_names <span class="op">=</span> preprocessed_cells.obs_names.copy()</span>
 <span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    cogaps_input.obs <span class="op">=</span> preprocessed_cells.var.copy()</span>
 <span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    cogaps_input.obs_names <span class="op">=</span> preprocessed_cells.var_names.copy()</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cogaps_input</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cogaps_input</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 </section>
@@ -738,9 +723,9 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 <h1><strong>Data Import</strong></h1>
 <hr>
 <p>We will start from a cached processed AnnData object. This keeps the focus of the case study on latent-variable analysis and interpretation rather than on rebuilding every preprocessing step from the original source files.</p>
-<div id="2df1439e" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>adata_cells <span class="op">=</span> ad.read_h5ad(PREPROCESSED_H5AD)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>adata_cells</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="9b6ad97c" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>adata_cells <span class="op">=</span> ad.read_h5ad(PREPROCESSED_H5AD)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>adata_cells</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>AnnData object with n_obs × n_vars = 24673 × 3000
     obs: 'nCount_RNA', 'nFeature_RNA', 'tsne1', 'tsne2', 'label', 'cluster', 'cell_type', 'replicate', 'nCount_SCT', 'nFeature_SCT', 'integrated_snn_res.0.4', 'seurat_clusters', 'condition'
@@ -756,19 +741,19 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 <li><code>cell_type</code>, so we can summarize patterns across immune compartments</li>
 <li><code>replicate</code>, so we can perform paired donor-aware summaries</li>
 </ol>
-<div id="b45c9474" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>required_obs <span class="op">=</span> {<span class="st">"condition"</span>, <span class="st">"cell_type"</span>, <span class="st">"replicate"</span>}</span>
+<div id="65ee38b8" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>required_obs <span class="op">=</span> {<span class="st">"condition"</span>, <span class="st">"cell_type"</span>, <span class="st">"replicate"</span>}</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>missing_obs <span class="op">=</span> required_obs.difference(adata_cells.obs.columns)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> missing_obs:</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Missing required metadata columns: </span><span class="sc">{</span><span class="bu">sorted</span>(missing_obs)<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>adata_cells.obs[[<span class="st">"condition"</span>, <span class="st">"cell_type"</span>, <span class="st">"replicate"</span>]].head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>adata_cells.obs[[<span class="st">"condition"</span>, <span class="st">"cell_type"</span>, <span class="st">"replicate"</span>]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -776,7 +761,7 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 <th data-quarto-table-cell-role="th">cell_type</th>
 <th data-quarto-table-cell-role="th">replicate</th>
 </tr>
-<tr class="even">
+<tr class="odd">
 <th data-quarto-table-cell-role="th">index</th>
 <th data-quarto-table-cell-role="th"></th>
 <th data-quarto-table-cell-role="th"></th>
@@ -785,31 +770,31 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">AAACATACATTTCC-1</th>
+<td data-quarto-table-cell-role="th">AAACATACATTTCC-1</td>
 <td>ctrl</td>
 <td>CD14+ Monocytes</td>
 <td>patient_1016</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">AAACATACCAGAAA-1</th>
+<td data-quarto-table-cell-role="th">AAACATACCAGAAA-1</td>
 <td>ctrl</td>
 <td>CD14+ Monocytes</td>
 <td>patient_1256</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">AAACATACCATGCA-1</th>
+<td data-quarto-table-cell-role="th">AAACATACCATGCA-1</td>
 <td>ctrl</td>
 <td>CD4 T cells</td>
 <td>patient_1488</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">AAACATACCTCGCT-1</th>
+<td data-quarto-table-cell-role="th">AAACATACCTCGCT-1</td>
 <td>ctrl</td>
 <td>CD14+ Monocytes</td>
 <td>patient_1256</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">AAACATACCTGGTA-1</th>
+<td data-quarto-table-cell-role="th">AAACATACCTGGTA-1</td>
 <td>ctrl</td>
 <td>Dendritic cells</td>
 <td>patient_1039</td>
@@ -821,17 +806,17 @@ gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true});
 </div>
 </div>
 <p>The default path in this case study uses a saved chosen CoGAPS model. We check that it is available now and interpret it later.</p>
-<div id="b656bd5b" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Analysis mode:"</span>, ANALYSIS_MODE)</span>
+<div id="a3002f88" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Analysis mode:"</span>, ANALYSIS_MODE)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved chosen model available:"</span>, HAS_CHOSEN_RESULT)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Cached dense CoGAPS input available:"</span>, HAS_CACHED_COGAPS_INPUT)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Chosen model metrics available:"</span>, CHOSEN_METRICS_JSON.exists())</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Lightweight pattern matrices available:"</span>, HAS_LIGHTWEIGHT_PATTERN_MATRICES)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Lightweight pattern summary available:"</span>, HAS_PATTERN_SUMMARY)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Lightweight pattern summary available:"</span>, HAS_PATTERN_SUMMARY)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Analysis mode: full_chosen_result
-Saved chosen model available: True
-Cached dense CoGAPS input available: True
+<pre><code>Analysis mode: lightweight_derived
+Saved chosen model available: False
+Cached dense CoGAPS input available: False
 Chosen model metrics available: True
 Lightweight pattern matrices available: True
 Lightweight pattern summary available: True</code></pre>
@@ -844,11 +829,11 @@ Lightweight pattern summary available: True</code></pre>
 <h1><strong>Data Exploration</strong></h1>
 <hr>
 <p>Before running or interpreting a model, we should inspect what is in the AnnData object.</p>
-<div id="5d02fa0d" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Shape:"</span>, adata_cells.shape)</span>
+<div id="6448b968" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Shape:"</span>, adata_cells.shape)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Observation columns:"</span>, <span class="bu">list</span>(adata_cells.obs.columns))</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Variable columns:"</span>, <span class="bu">list</span>(adata_cells.var.columns))</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Layers:"</span>, <span class="bu">list</span>(adata_cells.layers.keys()))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Layers:"</span>, <span class="bu">list</span>(adata_cells.layers.keys()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Shape: (24673, 3000)
 Observation columns: ['nCount_RNA', 'nFeature_RNA', 'tsne1', 'tsne2', 'label', 'cluster', 'cell_type', 'replicate', 'nCount_SCT', 'nFeature_SCT', 'integrated_snn_res.0.4', 'seurat_clusters', 'condition']
@@ -859,8 +844,8 @@ Layers: ['counts']</code></pre>
 <p>The object has cells as rows and genes as columns. The shape should be 24,673 cells by 3,000 highly variable genes.</p>
 <section id="condition-and-cell-type-summaries" class="level2">
 <h2 class="anchored" data-anchor-id="condition-and-cell-type-summaries">Condition and cell-type summaries</h2>
-<div id="53dd1e97" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>condition_counts <span class="op">=</span> (</span>
+<div id="26145620" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>condition_counts <span class="op">=</span> (</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    adata_cells.obs[<span class="st">"condition"</span>]</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .value_counts()</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .rename_axis(<span class="st">"condition"</span>)</span>
@@ -874,12 +859,12 @@ Layers: ['counts']</code></pre>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    .reset_index(name<span class="op">=</span><span class="st">"n_cells"</span>)</span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>condition_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>condition_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -889,12 +874,12 @@ Layers: ['counts']</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>stim</td>
 <td>12358</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>ctrl</td>
 <td>12315</td>
 </tr>
@@ -904,13 +889,13 @@ Layers: ['counts']</code></pre>
 </div>
 </div>
 </div>
-<div id="eb34b8d1" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>celltype_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="ed9f85c5" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>celltype_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -920,42 +905,42 @@ Layers: ['counts']</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>CD4 T cells</td>
 <td>11238</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>CD14+ Monocytes</td>
 <td>5697</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>B cells</td>
 <td>2651</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
+<td data-quarto-table-cell-role="th">3</td>
 <td>NK cells</td>
 <td>1716</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
+<td data-quarto-table-cell-role="th">4</td>
 <td>CD8 T cells</td>
 <td>1621</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">5</th>
+<td data-quarto-table-cell-role="th">5</td>
 <td>FCGR3A+ Monocytes</td>
 <td>1089</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">6</th>
+<td data-quarto-table-cell-role="th">6</td>
 <td>Dendritic cells</td>
 <td>529</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">7</th>
+<td data-quarto-table-cell-role="th">7</td>
 <td>Megakaryocytes</td>
 <td>132</td>
 </tr>
@@ -966,20 +951,20 @@ Layers: ['counts']</code></pre>
 </div>
 </div>
 <p>We can also check whether every donor or replicate has cells in both conditions.</p>
-<div id="e4d9939f" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pd.crosstab(adata_cells.obs[<span class="st">"replicate"</span>], adata_cells.obs[<span class="st">"condition"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="1a268ff5" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pd.crosstab(adata_cells.obs[<span class="st">"replicate"</span>], adata_cells.obs[<span class="st">"condition"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th">condition</th>
 <th data-quarto-table-cell-role="th">ctrl</th>
 <th data-quarto-table-cell-role="th">stim</th>
 </tr>
-<tr class="even">
+<tr class="odd">
 <th data-quarto-table-cell-role="th">replicate</th>
 <th data-quarto-table-cell-role="th"></th>
 <th data-quarto-table-cell-role="th"></th>
@@ -987,42 +972,42 @@ Layers: ['counts']</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">patient_101</th>
+<td data-quarto-table-cell-role="th">patient_101</td>
 <td>858</td>
 <td>1166</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">patient_107</th>
+<td data-quarto-table-cell-role="th">patient_107</td>
 <td>517</td>
 <td>525</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">patient_1015</th>
+<td data-quarto-table-cell-role="th">patient_1015</td>
 <td>2738</td>
 <td>2352</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">patient_1016</th>
+<td data-quarto-table-cell-role="th">patient_1016</td>
 <td>1723</td>
 <td>1635</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">patient_1039</th>
+<td data-quarto-table-cell-role="th">patient_1039</td>
 <td>461</td>
 <td>641</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">patient_1244</th>
+<td data-quarto-table-cell-role="th">patient_1244</td>
 <td>1879</td>
 <td>1464</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">patient_1256</th>
+<td data-quarto-table-cell-role="th">patient_1256</td>
 <td>2108</td>
 <td>2026</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">patient_1488</th>
+<td data-quarto-table-cell-role="th">patient_1488</td>
 <td>2031</td>
 <td>2549</td>
 </tr>
@@ -1036,15 +1021,15 @@ Layers: ['counts']</code></pre>
 <section id="sparsity" class="level2">
 <h2 class="anchored" data-anchor-id="sparsity">Sparsity</h2>
 <p>Single-cell RNA-seq matrices often contain many zeros. We can measure sparsity directly.</p>
-<div id="c95b6bd2" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> adata_cells.X</span>
+<div id="f47a4af4" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> adata_cells.X</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>nnz <span class="op">=</span> X.nnz <span class="cf">if</span> sparse.issparse(X) <span class="cf">else</span> np.count_nonzero(X)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> adata_cells.n_obs <span class="op">*</span> adata_cells.n_vars</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>sparsity <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (nnz <span class="op">/</span> total)</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Nonzero entries: </span><span class="sc">{</span>nnz<span class="sc">:,}</span><span class="ss">"</span>)</span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total entries: </span><span class="sc">{</span>total<span class="sc">:,}</span><span class="ss">"</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Sparsity: </span><span class="sc">{</span>sparsity<span class="sc">:.4%}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Sparsity: </span><span class="sc">{</span>sparsity<span class="sc">:.4%}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Nonzero entries: 2,916,846
 Total entries: 74,019,000
@@ -1059,11 +1044,11 @@ Sparsity: 96.0593%</code></pre>
 <h1><strong>Data Wrangling</strong></h1>
 <hr>
 <p>The processed AnnData object was generated before this case study. The frozen preprocessing steps include filtering genes by minimum cell count, library-size normalization, log transformation, and selection of 3,000 highly variable genes.</p>
-<div id="7f688908" class="cell" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(PREPROCESS_CONFIG_JSON) <span class="im">as</span> f:</span>
+<div id="d3e303a6" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(PREPROCESS_CONFIG_JSON) <span class="im">as</span> f:</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    preprocess_config <span class="op">=</span> json.load(f)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>preprocess_config</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>preprocess_config</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>{'raw_h5ad': 'kang_counts_25k.h5ad',
  'min_cells': 3,
@@ -1076,30 +1061,34 @@ Sparsity: 96.0593%</code></pre>
 <section id="preparing-a-cogaps-input" class="level2">
 <h2 class="anchored" data-anchor-id="preparing-a-cogaps-input">Preparing a CoGAPS input</h2>
 <p>The AnnData object we loaded is cells x genes. The CoGAPS input used here is genes x cells. That transpose is not just a technical detail: it determines where gene metadata and cell metadata live.</p>
-<div id="eb0f02b9" class="cell" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_CACHED_COGAPS_INPUT:</span>
+<div id="07c2bee6" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_CACHED_COGAPS_INPUT:</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    cogaps_input <span class="op">=</span> ad.read_h5ad(COGAPS_INPUT_H5AD)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    cogaps_input</span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    cogaps_input <span class="op">=</span> <span class="va">None</span></span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Cached dense CoGAPS input not available in this render context."</span>)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Expected genes x cells shape:"</span>, (adata_cells.n_vars, adata_cells.n_obs))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Expected genes x cells shape:"</span>, (adata_cells.n_vars, adata_cells.n_obs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Cached dense CoGAPS input not available in this render context.
+Expected genes x cells shape: (3000, 24673)</code></pre>
+</div>
 </div>
 <p>The cached input is the default path because rebuilding the dense genes x cells matrix can take time and memory. The code below shows how it was created, but it is not evaluated by default.</p>
-<div id="36b5b549" class="cell" data-execution_count="14">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>cogaps_input_from_cells <span class="op">=</span> build_cogaps_input(adata_cells)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>cogaps_input_from_cells.write_h5ad(COGAPS_INPUT_H5AD)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="c231fddc" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>cogaps_input_from_cells <span class="op">=</span> build_cogaps_input(adata_cells)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>cogaps_input_from_cells.write_h5ad(COGAPS_INPUT_H5AD)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The CoGAPS input should have one row per gene and one column per cell.</p>
-<div id="df02b12e" class="cell" data-execution_count="15">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> cogaps_input <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> cogaps_input.n_obs <span class="op">==</span> adata_cells.n_vars</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> cogaps_input.n_vars <span class="op">==</span> adata_cells.n_obs</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"CoGAPS input shape:"</span>, cogaps_input.shape)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Skipping dense input validation because the cached genes x cells file is absent."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="e8e9a914" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> cogaps_input <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> cogaps_input.n_obs <span class="op">==</span> adata_cells.n_vars</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> cogaps_input.n_vars <span class="op">==</span> adata_cells.n_obs</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"CoGAPS input shape:"</span>, cogaps_input.shape)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Skipping dense input validation because the cached genes x cells file is absent."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CoGAPS input shape: (3000, 24673)</code></pre>
+<pre><code>Skipping dense input validation because the cached genes x cells file is absent.</code></pre>
 </div>
 </div>
 <div class="think_question">
@@ -1125,19 +1114,19 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <p>Visualizations help us check the structure of the dataset before interpreting model results.</p>
 <section id="cell-types-by-condition" class="level2">
 <h2 class="anchored" data-anchor-id="cell-types-by-condition">Cell types by condition</h2>
-<div id="46afd4b4" class="cell" data-execution_count="16">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>celltype_condition <span class="op">=</span> (</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    adata_cells.obs.groupby([<span class="st">"cell_type"</span>, <span class="st">"condition"</span>], observed<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .size()</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    .reset_index(name<span class="op">=</span><span class="st">"n_cells"</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>celltype_condition.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="a83d870e" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>celltype_condition <span class="op">=</span> (</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    adata_cells.obs.groupby([<span class="st">"cell_type"</span>, <span class="st">"condition"</span>], observed<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .size()</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .reset_index(name<span class="op">=</span><span class="st">"n_cells"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>celltype_condition.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1148,31 +1137,31 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>CD4 T cells</td>
 <td>ctrl</td>
 <td>5560</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>CD4 T cells</td>
 <td>stim</td>
 <td>5678</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>CD14+ Monocytes</td>
 <td>ctrl</td>
 <td>2932</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
+<td data-quarto-table-cell-role="th">3</td>
 <td>CD14+ Monocytes</td>
 <td>stim</td>
 <td>2765</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
+<td data-quarto-table-cell-role="th">4</td>
 <td>B cells</td>
 <td>ctrl</td>
 <td>1316</td>
@@ -1183,21 +1172,21 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 </div>
 </div>
 </div>
-<div id="a830480f" class="cell" data-execution_count="17">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pivot_counts <span class="op">=</span> (</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    celltype_condition</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span><span class="st">"cell_type"</span>, columns<span class="op">=</span><span class="st">"condition"</span>, values<span class="op">=</span><span class="st">"n_cells"</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .fillna(<span class="dv">0</span>)</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    .sort_values(by<span class="op">=</span>[<span class="st">"ctrl"</span>, <span class="st">"stim"</span>], ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> pivot_counts.plot(kind<span class="op">=</span><span class="st">"bar"</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">4</span>))</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Number of cells"</span>)</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Cell type"</span>)</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Cells per annotated cell type and condition"</span>)</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="6cc171ef" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pivot_counts <span class="op">=</span> (</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    celltype_condition</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span><span class="st">"cell_type"</span>, columns<span class="op">=</span><span class="st">"condition"</span>, values<span class="op">=</span><span class="st">"n_cells"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    .fillna(<span class="dv">0</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    .sort_values(by<span class="op">=</span>[<span class="st">"ctrl"</span>, <span class="st">"stim"</span>], ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> pivot_counts.plot(kind<span class="op">=</span><span class="st">"bar"</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">4</span>))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Number of cells"</span>)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Cell type"</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Cells per annotated cell type and condition"</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -1228,14 +1217,14 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <section id="why-use-k-7" class="level2">
 <h2 class="anchored" data-anchor-id="why-use-k-7">Why use <code>K = 7</code>?</h2>
 <p>The full rank-selection sweep is not part of the main learner workflow. It was run beforehand as an instructor/reviewer-facing model-selection step. The selected model used <code>K = 7</code>, <code>seed = 2</code>, and <code>n_iter = 2000</code>.</p>
-<div id="06ef057c" class="cell" data-execution_count="18">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>summary_by_k <span class="op">=</span> pd.read_csv(SUMMARY_BY_K_CSV)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>summary_by_k.sort_values([<span class="st">"K"</span>, <span class="st">"n_iter"</span>]).head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="f04d1ced" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>summary_by_k <span class="op">=</span> pd.read_csv(SUMMARY_BY_K_CSV)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>summary_by_k.sort_values([<span class="st">"K"</span>, <span class="st">"n_iter"</span>]).head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="17">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1250,7 +1239,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>7</td>
 <td>2000</td>
 <td>5</td>
@@ -1260,7 +1249,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.923077</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>7</td>
 <td>10000</td>
 <td>5</td>
@@ -1270,7 +1259,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.923077</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>7</td>
 <td>20000</td>
 <td>5</td>
@@ -1280,7 +1269,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.923077</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
+<td data-quarto-table-cell-role="th">3</td>
 <td>9</td>
 <td>2000</td>
 <td>5</td>
@@ -1290,7 +1279,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.449275</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
+<td data-quarto-table-cell-role="th">4</td>
 <td>9</td>
 <td>10000</td>
 <td>5</td>
@@ -1300,7 +1289,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.960784</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">5</th>
+<td data-quarto-table-cell-role="th">5</td>
 <td>9</td>
 <td>20000</td>
 <td>5</td>
@@ -1310,7 +1299,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.851852</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">6</th>
+<td data-quarto-table-cell-role="th">6</td>
 <td>11</td>
 <td>2000</td>
 <td>5</td>
@@ -1320,7 +1309,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.785714</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">7</th>
+<td data-quarto-table-cell-role="th">7</td>
 <td>11</td>
 <td>10000</td>
 <td>5</td>
@@ -1330,7 +1319,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.562500</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">8</th>
+<td data-quarto-table-cell-role="th">8</td>
 <td>11</td>
 <td>20000</td>
 <td>5</td>
@@ -1340,7 +1329,7 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <td>0.886792</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">9</th>
+<td data-quarto-table-cell-role="th">9</td>
 <td>13</td>
 <td>2000</td>
 <td>5</td>
@@ -1360,34 +1349,34 @@ Because the meaning of rows and columns changes. In the cells x genes object, <c
 <section id="load-the-chosen-cogaps-result-or-lightweight-pattern-exports" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="load-the-chosen-cogaps-result-or-lightweight-pattern-exports">Load the chosen CoGAPS result or lightweight pattern exports</h2>
 <p>The default learner path loads a saved chosen model. If that large <code>.h5ad</code> file is unavailable, this case study falls back to lightweight exported pattern matrices and summary tables so the main interpretation steps still render cleanly.</p>
-<div id="219881b7" class="cell" data-execution_count="19">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(CHOSEN_METRICS_JSON) <span class="im">as</span> f:</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    chosen_metrics <span class="op">=</span> json.load(f)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_CHOSEN_RESULT:</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> ad.read_h5ad(CHOSEN_RESULT_H5AD)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    pattern_names <span class="op">=</span> pattern_columns(result.obs)</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> result.obs[pattern_names].copy()</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    A.index.name <span class="op">=</span> <span class="st">"gene"</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> result.var[pattern_names].copy()</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    P.index <span class="op">=</span> result.var_names.astype(<span class="bu">str</span>)</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    P.index.name <span class="op">=</span> <span class="st">"cell_barcode"</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    analysis_mode_label <span class="op">=</span> <span class="st">"Full chosen-model H5AD"</span></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    A, P <span class="op">=</span> load_lightweight_pattern_matrices()</span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    pattern_names <span class="op">=</span> pattern_columns(A)</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    analysis_mode_label <span class="op">=</span> <span class="st">"Lightweight exported A/P matrices"</span></span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Analysis mode:"</span>, analysis_mode_label)</span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Pattern columns:"</span>, pattern_names)</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"A matrix shape:"</span>, A.shape)</span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"P matrix shape:"</span>, P.shape)</span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"IFN-associated pattern from metrics:"</span>, chosen_metrics[<span class="st">"ifn_pattern"</span>])</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"IFN correlation:"</span>, <span class="bu">round</span>(chosen_metrics[<span class="st">"ifn_corr"</span>], <span class="dv">4</span>))</span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Runtime in original environment, minutes:"</span>, <span class="bu">round</span>(chosen_metrics[<span class="st">"runtime_sec"</span>] <span class="op">/</span> <span class="dv">60</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="94c71fa5" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(CHOSEN_METRICS_JSON) <span class="im">as</span> f:</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    chosen_metrics <span class="op">=</span> json.load(f)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_CHOSEN_RESULT:</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> ad.read_h5ad(CHOSEN_RESULT_H5AD)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    pattern_names <span class="op">=</span> pattern_columns(result.obs)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> result.obs[pattern_names].copy()</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    A.index.name <span class="op">=</span> <span class="st">"gene"</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> result.var[pattern_names].copy()</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    P.index <span class="op">=</span> result.var_names.astype(<span class="bu">str</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    P.index.name <span class="op">=</span> <span class="st">"cell_barcode"</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    analysis_mode_label <span class="op">=</span> <span class="st">"Full chosen-model H5AD"</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    A, P <span class="op">=</span> load_lightweight_pattern_matrices()</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    pattern_names <span class="op">=</span> pattern_columns(A)</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    analysis_mode_label <span class="op">=</span> <span class="st">"Lightweight exported A/P matrices"</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Analysis mode:"</span>, analysis_mode_label)</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Pattern columns:"</span>, pattern_names)</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"A matrix shape:"</span>, A.shape)</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"P matrix shape:"</span>, P.shape)</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"IFN-associated pattern from metrics:"</span>, chosen_metrics[<span class="st">"ifn_pattern"</span>])</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"IFN correlation:"</span>, <span class="bu">round</span>(chosen_metrics[<span class="st">"ifn_corr"</span>], <span class="dv">4</span>))</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Runtime in original environment, minutes:"</span>, <span class="bu">round</span>(chosen_metrics[<span class="st">"runtime_sec"</span>] <span class="op">/</span> <span class="dv">60</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Analysis mode: Full chosen-model H5AD
+<pre><code>Analysis mode: Lightweight exported A/P matrices
 Pattern columns: ['Pattern1', 'Pattern2', 'Pattern3', 'Pattern4', 'Pattern5', 'Pattern6', 'Pattern7']
 A matrix shape: (3000, 7)
 P matrix shape: (24673, 7)
@@ -1404,41 +1393,41 @@ Runtime in original environment, minutes: 39.5</code></pre>
 Optional: run one single-process chosen-<code>K</code> model locally
 </summary>
 <p>The code below shows the intended local-run path. It is not evaluated by default in this draft because it can take substantial time and depends on the local <code>PyCoGAPS</code> installation.</p>
-<div id="36a8b12e" class="cell" data-execution_count="20">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PyCoGAPS.parameters <span class="im">import</span> CoParams</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PyCoGAPS.pycogaps_main <span class="im">import</span> CoGAPS</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> CoParams(</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    nPatterns<span class="op">=</span>CHOSEN_K,</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    nIterations<span class="op">=</span>CHOSEN_ITER,</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span>CHOSEN_SEED,</span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    useSparseOptimization<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> CoGAPS(<span class="bu">str</span>(COGAPS_INPUT_H5AD), params)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cf9a6153" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PyCoGAPS.parameters <span class="im">import</span> CoParams</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PyCoGAPS.pycogaps_main <span class="im">import</span> CoGAPS</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> CoParams(</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    nPatterns<span class="op">=</span>CHOSEN_K,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    nIterations<span class="op">=</span>CHOSEN_ITER,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span>CHOSEN_SEED,</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    useSparseOptimization<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> CoGAPS(<span class="bu">str</span>(COGAPS_INPUT_H5AD), params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </details>
 </section>
 <section id="extract-the-a-and-p-matrices" class="level2">
 <h2 class="anchored" data-anchor-id="extract-the-a-and-p-matrices">Extract the <code>A</code> and <code>P</code> matrices</h2>
 <p>The chosen result stores gene weights and cell activities as pattern columns. In the saved result, <code>result.obs</code> contains gene weights and <code>result.var</code> contains cell activities. The lightweight fallback stores those same matrices as small tabular files.</p>
-<div id="15a16792" class="cell" data-execution_count="21">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>adata_with_patterns <span class="op">=</span> adata_cells.copy()</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>missing_cells <span class="op">=</span> adata_with_patterns.obs_names.difference(P.index)</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(missing_cells) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Missing pattern activity values for </span><span class="sc">{</span><span class="bu">len</span>(missing_cells)<span class="sc">}</span><span class="ss"> cells."</span>)</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> P.loc[adata_with_patterns.obs_names].copy()</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> pattern <span class="kw">in</span> pattern_names:</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    adata_with_patterns.obs[pattern] <span class="op">=</span> P[pattern].to_numpy()</span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>adata_with_patterns.obs[[<span class="st">"condition"</span>, <span class="st">"cell_type"</span>, <span class="op">*</span>pattern_names]].head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="679b28d0" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>adata_with_patterns <span class="op">=</span> adata_cells.copy()</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>missing_cells <span class="op">=</span> adata_with_patterns.obs_names.difference(P.index)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(missing_cells) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Missing pattern activity values for </span><span class="sc">{</span><span class="bu">len</span>(missing_cells)<span class="sc">}</span><span class="ss"> cells."</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> P.loc[adata_with_patterns.obs_names].copy()</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> pattern <span class="kw">in</span> pattern_names:</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    adata_with_patterns.obs[pattern] <span class="op">=</span> P[pattern].to_numpy()</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>adata_with_patterns.obs[[<span class="st">"condition"</span>, <span class="st">"cell_type"</span>, <span class="op">*</span>pattern_names]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="19">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1452,7 +1441,7 @@ Optional: run one single-process chosen-<code>K</code> model locally
 <th data-quarto-table-cell-role="th">Pattern6</th>
 <th data-quarto-table-cell-role="th">Pattern7</th>
 </tr>
-<tr class="even">
+<tr class="odd">
 <th data-quarto-table-cell-role="th">index</th>
 <th data-quarto-table-cell-role="th"></th>
 <th data-quarto-table-cell-role="th"></th>
@@ -1467,7 +1456,7 @@ Optional: run one single-process chosen-<code>K</code> model locally
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">AAACATACATTTCC-1</th>
+<td data-quarto-table-cell-role="th">AAACATACATTTCC-1</td>
 <td>ctrl</td>
 <td>CD14+ Monocytes</td>
 <td>0.193715</td>
@@ -1479,7 +1468,7 @@ Optional: run one single-process chosen-<code>K</code> model locally
 <td>0.006015</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">AAACATACCAGAAA-1</th>
+<td data-quarto-table-cell-role="th">AAACATACCAGAAA-1</td>
 <td>ctrl</td>
 <td>CD14+ Monocytes</td>
 <td>0.146094</td>
@@ -1491,7 +1480,7 @@ Optional: run one single-process chosen-<code>K</code> model locally
 <td>0.000018</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">AAACATACCATGCA-1</th>
+<td data-quarto-table-cell-role="th">AAACATACCATGCA-1</td>
 <td>ctrl</td>
 <td>CD4 T cells</td>
 <td>0.000126</td>
@@ -1503,7 +1492,7 @@ Optional: run one single-process chosen-<code>K</code> model locally
 <td>0.000042</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">AAACATACCTCGCT-1</th>
+<td data-quarto-table-cell-role="th">AAACATACCTCGCT-1</td>
 <td>ctrl</td>
 <td>CD14+ Monocytes</td>
 <td>0.048556</td>
@@ -1515,7 +1504,7 @@ Optional: run one single-process chosen-<code>K</code> model locally
 <td>0.000000</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">AAACATACCTGGTA-1</th>
+<td data-quarto-table-cell-role="th">AAACATACCTGGTA-1</td>
 <td>ctrl</td>
 <td>Dendritic cells</td>
 <td>0.001074</td>
@@ -1536,14 +1525,14 @@ Optional: run one single-process chosen-<code>K</code> model locally
 <section id="identify-the-ifn-associated-pattern" class="level2">
 <h2 class="anchored" data-anchor-id="identify-the-ifn-associated-pattern">Identify the IFN-associated pattern</h2>
 <p>We identify the stimulation-associated pattern by correlating each pattern’s cell activity with a binary stimulation indicator.</p>
-<div id="f1d02955" class="cell" data-execution_count="22">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>stim_indicator <span class="op">=</span> (adata_with_patterns.obs[<span class="st">"condition"</span>].astype(<span class="bu">str</span>) <span class="op">==</span> STIM_LABEL).astype(<span class="bu">int</span>)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>pattern_corrs <span class="op">=</span> pd.Series(</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    {pattern: adata_with_patterns.obs[pattern].corr(stim_indicator) <span class="cf">for</span> pattern <span class="kw">in</span> pattern_names},</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"corr_with_stim"</span>,</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>).sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>pattern_corrs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="15c8f717" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>stim_indicator <span class="op">=</span> (adata_with_patterns.obs[<span class="st">"condition"</span>].astype(<span class="bu">str</span>) <span class="op">==</span> STIM_LABEL).astype(<span class="bu">int</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>pattern_corrs <span class="op">=</span> pd.Series(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    {pattern: adata_with_patterns.obs[pattern].corr(stim_indicator) <span class="cf">for</span> pattern <span class="kw">in</span> pattern_names},</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"corr_with_stim"</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>).sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>pattern_corrs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="20">
 <pre><code>Pattern2    0.748491
 Pattern7    0.368084
@@ -1557,19 +1546,19 @@ Name: corr_with_stim, dtype: float64</code></pre>
 </div>
 <p>Pattern2 is the strongest IFN-associated pattern in this chosen model.</p>
 <p>If a cached lightweight correlation table is available, we can confirm that it matches the current render context.</p>
-<div id="5e4fc2ae" class="cell" data-execution_count="23">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_PATTERN_CORRELATIONS:</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    cached_pattern_corrs <span class="op">=</span> pd.read_csv(PATTERN_CORRELATIONS_CSV)</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    corr_check <span class="op">=</span> (</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>        cached_pattern_corrs.set_index(<span class="st">"pattern"</span>)[<span class="st">"corr_with_stim"</span>]</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>        .reindex(pattern_corrs.index)</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>        .subtract(pattern_corrs)</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">abs</span>()</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">max</span>()</span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Max absolute difference from cached pattern_correlations.csv:"</span>, <span class="bu">round</span>(<span class="bu">float</span>(corr_check), <span class="dv">10</span>))</span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Cached pattern_correlations.csv not available."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="6ce4761d" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_PATTERN_CORRELATIONS:</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    cached_pattern_corrs <span class="op">=</span> pd.read_csv(PATTERN_CORRELATIONS_CSV)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    corr_check <span class="op">=</span> (</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>        cached_pattern_corrs.set_index(<span class="st">"pattern"</span>)[<span class="st">"corr_with_stim"</span>]</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>        .reindex(pattern_corrs.index)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>        .subtract(pattern_corrs)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">abs</span>()</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">max</span>()</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Max absolute difference from cached pattern_correlations.csv:"</span>, <span class="bu">round</span>(<span class="bu">float</span>(corr_check), <span class="dv">10</span>))</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Cached pattern_correlations.csv not available."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Max absolute difference from cached pattern_correlations.csv: 0.0</code></pre>
 </div>
@@ -1577,14 +1566,14 @@ Name: corr_with_stim, dtype: float64</code></pre>
 </section>
 <section id="inspect-top-genes-for-pattern2" class="level2">
 <h2 class="anchored" data-anchor-id="inspect-top-genes-for-pattern2">Inspect top genes for Pattern2</h2>
-<div id="50df491e" class="cell" data-execution_count="24">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>pattern2_top_genes <span class="op">=</span> top_genes_from_matrix(A, <span class="st">"Pattern2"</span>, n<span class="op">=</span><span class="dv">15</span>)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>pattern2_top_genes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="e5c36b7f" class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>pattern2_top_genes <span class="op">=</span> top_genes_from_matrix(A, <span class="st">"Pattern2"</span>, n<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>pattern2_top_genes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1594,77 +1583,77 @@ Name: corr_with_stim, dtype: float64</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>ISG15</td>
 <td>9.908002</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>ISG20</td>
 <td>8.472368</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>IFI6</td>
 <td>6.688204</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
+<td data-quarto-table-cell-role="th">3</td>
 <td>IFIT3</td>
 <td>4.989565</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
+<td data-quarto-table-cell-role="th">4</td>
 <td>LY6E</td>
 <td>4.590168</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">5</th>
+<td data-quarto-table-cell-role="th">5</td>
 <td>IFIT1</td>
 <td>4.066503</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">6</th>
+<td data-quarto-table-cell-role="th">6</td>
 <td>MX1</td>
 <td>3.913702</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">7</th>
+<td data-quarto-table-cell-role="th">7</td>
 <td>FTH1</td>
 <td>2.225061</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">8</th>
+<td data-quarto-table-cell-role="th">8</td>
 <td>IFIT2</td>
 <td>1.620791</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">9</th>
+<td data-quarto-table-cell-role="th">9</td>
 <td>IRF7</td>
 <td>1.552124</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">10</th>
+<td data-quarto-table-cell-role="th">10</td>
 <td>SAT1</td>
 <td>1.540814</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">11</th>
+<td data-quarto-table-cell-role="th">11</td>
 <td>TNFSF10</td>
 <td>1.419751</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">12</th>
+<td data-quarto-table-cell-role="th">12</td>
 <td>OAS1</td>
 <td>1.360103</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">13</th>
+<td data-quarto-table-cell-role="th">13</td>
 <td>PLSCR1</td>
 <td>1.190072</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">14</th>
+<td data-quarto-table-cell-role="th">14</td>
 <td>BST2</td>
 <td>1.088664</td>
 </tr>
@@ -1694,30 +1683,30 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <section id="add-directionality-for-pattern2-genes" class="level2">
 <h2 class="anchored" data-anchor-id="add-directionality-for-pattern2-genes">Add directionality for Pattern2 genes</h2>
 <p>We answer the directionality question using a targeted paired pseudobulk analysis. The directionality table was generated from raw counts in <code>.layers["counts"]</code> by aggregating cells within donor and condition, computing <code>log2(stim CPM + 0.5) - log2(ctrl CPM + 0.5)</code>, and summarizing across donors.</p>
-<div id="5a8095d4" class="cell" data-execution_count="25">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>direction_global <span class="op">=</span> pd.read_csv(DIRECTION_GLOBAL_CSV)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>pattern2_direction <span class="op">=</span> (</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    direction_global.loc[direction_global[<span class="st">"pattern"</span>] <span class="op">==</span> <span class="st">"Pattern2"</span>]</span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    .sort_values(<span class="st">"rank"</span>)</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    [[</span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"rank"</span>,</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gene"</span>,</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mean_log2fc_stim_vs_ctrl"</span>,</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_up_pairs"</span>,</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_down_pairs"</span>,</span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"wilcoxon_fdr"</span>,</span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"direction"</span>,</span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"evidence_strength"</span>,</span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>    ]]</span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>pattern2_direction</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="11c669c7" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>direction_global <span class="op">=</span> pd.read_csv(DIRECTION_GLOBAL_CSV)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>pattern2_direction <span class="op">=</span> (</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    direction_global.loc[direction_global[<span class="st">"pattern"</span>] <span class="op">==</span> <span class="st">"Pattern2"</span>]</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    .sort_values(<span class="st">"rank"</span>)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    [[</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"rank"</span>,</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gene"</span>,</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mean_log2fc_stim_vs_ctrl"</span>,</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_up_pairs"</span>,</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_down_pairs"</span>,</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"wilcoxon_fdr"</span>,</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"direction"</span>,</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"evidence_strength"</span>,</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    ]]</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>pattern2_direction</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="23">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1733,7 +1722,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">15</th>
+<td data-quarto-table-cell-role="th">15</td>
 <td>1</td>
 <td>ISG15</td>
 <td>6.173216</td>
@@ -1744,7 +1733,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">16</th>
+<td data-quarto-table-cell-role="th">16</td>
 <td>2</td>
 <td>ISG20</td>
 <td>3.668504</td>
@@ -1755,7 +1744,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">17</th>
+<td data-quarto-table-cell-role="th">17</td>
 <td>3</td>
 <td>IFI6</td>
 <td>4.688122</td>
@@ -1766,7 +1755,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">18</th>
+<td data-quarto-table-cell-role="th">18</td>
 <td>4</td>
 <td>IFIT3</td>
 <td>6.394614</td>
@@ -1777,7 +1766,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">19</th>
+<td data-quarto-table-cell-role="th">19</td>
 <td>5</td>
 <td>LY6E</td>
 <td>4.183286</td>
@@ -1788,7 +1777,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">20</th>
+<td data-quarto-table-cell-role="th">20</td>
 <td>6</td>
 <td>IFIT1</td>
 <td>7.416023</td>
@@ -1799,7 +1788,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">21</th>
+<td data-quarto-table-cell-role="th">21</td>
 <td>7</td>
 <td>MX1</td>
 <td>4.937975</td>
@@ -1810,7 +1799,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">22</th>
+<td data-quarto-table-cell-role="th">22</td>
 <td>8</td>
 <td>FTH1</td>
 <td>-1.080925</td>
@@ -1821,7 +1810,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">23</th>
+<td data-quarto-table-cell-role="th">23</td>
 <td>9</td>
 <td>IFIT2</td>
 <td>6.390504</td>
@@ -1832,7 +1821,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">24</th>
+<td data-quarto-table-cell-role="th">24</td>
 <td>10</td>
 <td>IRF7</td>
 <td>2.958523</td>
@@ -1843,7 +1832,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">25</th>
+<td data-quarto-table-cell-role="th">25</td>
 <td>11</td>
 <td>SAT1</td>
 <td>1.369810</td>
@@ -1854,7 +1843,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">26</th>
+<td data-quarto-table-cell-role="th">26</td>
 <td>12</td>
 <td>TNFSF10</td>
 <td>5.049336</td>
@@ -1865,7 +1854,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">27</th>
+<td data-quarto-table-cell-role="th">27</td>
 <td>13</td>
 <td>OAS1</td>
 <td>3.962388</td>
@@ -1876,7 +1865,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">28</th>
+<td data-quarto-table-cell-role="th">28</td>
 <td>14</td>
 <td>PLSCR1</td>
 <td>2.671636</td>
@@ -1887,7 +1876,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>strong</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">29</th>
+<td data-quarto-table-cell-role="th">29</td>
 <td>15</td>
 <td>BST2</td>
 <td>2.028792</td>
@@ -1907,35 +1896,35 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </section>
 <section id="summarize-all-patterns" class="level2">
 <h2 class="anchored" data-anchor-id="summarize-all-patterns">Summarize all patterns</h2>
-<div id="5228252e" class="cell" data-execution_count="26">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_PATTERN_SUMMARY:</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    pattern_summary <span class="op">=</span> pd.read_csv(PATTERN_SUMMARY_CSV)</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    pattern_summary_rows <span class="op">=</span> []</span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pattern <span class="kw">in</span> pattern_names:</span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>        top_genes <span class="op">=</span> <span class="st">", "</span>.join(top_genes_from_matrix(A, pattern, n<span class="op">=</span><span class="dv">8</span>)[<span class="st">"gene"</span>].tolist())</span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>        dominant_cell_type <span class="op">=</span> (</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>            adata_with_patterns.obs.groupby(<span class="st">"cell_type"</span>, observed<span class="op">=</span><span class="va">True</span>)[pattern]</span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>            .mean()</span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>            .sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>            .index[<span class="dv">0</span>]</span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>        pattern_summary_rows.append(</span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>            {</span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>                <span class="st">"pattern"</span>: pattern,</span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>                <span class="st">"corr_with_stim"</span>: <span class="bu">round</span>(<span class="bu">float</span>(pattern_corrs[pattern]), <span class="dv">4</span>),</span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>                <span class="st">"dominant_cell_type"</span>: dominant_cell_type,</span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>                <span class="st">"top_genes_top8"</span>: top_genes,</span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>            }</span>
-<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    pattern_summary <span class="op">=</span> pd.DataFrame(pattern_summary_rows)</span>
-<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>pattern_summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="ab1d0dae" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_PATTERN_SUMMARY:</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    pattern_summary <span class="op">=</span> pd.read_csv(PATTERN_SUMMARY_CSV)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    pattern_summary_rows <span class="op">=</span> []</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pattern <span class="kw">in</span> pattern_names:</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>        top_genes <span class="op">=</span> <span class="st">", "</span>.join(top_genes_from_matrix(A, pattern, n<span class="op">=</span><span class="dv">8</span>)[<span class="st">"gene"</span>].tolist())</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>        dominant_cell_type <span class="op">=</span> (</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>            adata_with_patterns.obs.groupby(<span class="st">"cell_type"</span>, observed<span class="op">=</span><span class="va">True</span>)[pattern]</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>            .mean()</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>            .sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>            .index[<span class="dv">0</span>]</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>        pattern_summary_rows.append(</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>                <span class="st">"pattern"</span>: pattern,</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>                <span class="st">"corr_with_stim"</span>: <span class="bu">round</span>(<span class="bu">float</span>(pattern_corrs[pattern]), <span class="dv">4</span>),</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>                <span class="st">"dominant_cell_type"</span>: dominant_cell_type,</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>                <span class="st">"top_genes_top8"</span>: top_genes,</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>    pattern_summary <span class="op">=</span> pd.DataFrame(pattern_summary_rows)</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>pattern_summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1951,7 +1940,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>Pattern2</td>
 <td>0.748491</td>
 <td>FCGR3A+ Monocytes</td>
@@ -1962,7 +1951,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>ISG15, ISG20, IFI6, IFIT3, LY6E, IFIT1, MX1, F...</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>Pattern7</td>
 <td>0.368084</td>
 <td>CD14+ Monocytes</td>
@@ -1973,7 +1962,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>CXCL10, ISG15, APOBEC3A, IFITM3, RSAD2, TNFSF1...</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>Pattern6</td>
 <td>0.002746</td>
 <td>Dendritic cells</td>
@@ -1984,7 +1973,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>CD74, HLA-DRA, HLA-DRB1, HLA-DPA1, HLA-DPB1, F...</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
+<td data-quarto-table-cell-role="th">3</td>
 <td>Pattern1</td>
 <td>-0.022635</td>
 <td>FCGR3A+ Monocytes</td>
@@ -1995,7 +1984,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>TIMP1, FTH1, SOD2, MS4A7, S100A11, TYROBP, FCG...</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
+<td data-quarto-table-cell-role="th">4</td>
 <td>Pattern3</td>
 <td>-0.105255</td>
 <td>CD8 T cells</td>
@@ -2006,7 +1995,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>FTH1, FTL, ANXA1, SH3BGRL3, GAPDH, S100A11, S1...</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">5</th>
+<td data-quarto-table-cell-role="th">5</td>
 <td>Pattern5</td>
 <td>-0.126081</td>
 <td>CD4 T cells</td>
@@ -2017,7 +2006,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>FTH1, ACTB, PFN1, CCR7, VIM, HSPA8, LTB, EMP3,...</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">6</th>
+<td data-quarto-table-cell-role="th">6</td>
 <td>Pattern4</td>
 <td>-0.261200</td>
 <td>CD14+ Monocytes</td>
@@ -2038,28 +2027,28 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </section>
 <section id="pattern2-across-cell-types" class="level2">
 <h2 class="anchored" data-anchor-id="pattern2-across-cell-types">Pattern2 across cell types</h2>
-<div id="2665c13c" class="cell" data-execution_count="27">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_PATTERN_ACTIVITY_BY_CELLTYPE:</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    pattern2_by_celltype <span class="op">=</span> (</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>        pd.read_csv(PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>        .loc[<span class="kw">lambda</span> df: df[<span class="st">"pattern"</span>] <span class="op">==</span> <span class="st">"Pattern2"</span>]</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>        .sort_values([<span class="st">"cell_type"</span>, <span class="st">"condition"</span>])</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    pattern2_by_celltype <span class="op">=</span> (</span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>        adata_with_patterns.obs.groupby([<span class="st">"cell_type"</span>, <span class="st">"condition"</span>], observed<span class="op">=</span><span class="va">True</span>)[<span class="st">"Pattern2"</span>]</span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>        .agg([<span class="st">"mean"</span>, <span class="st">"median"</span>, <span class="st">"count"</span>])</span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>        .reset_index()</span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>        .rename(columns<span class="op">=</span>{<span class="st">"mean"</span>: <span class="st">"mean_activity"</span>, <span class="st">"median"</span>: <span class="st">"median_activity"</span>, <span class="st">"count"</span>: <span class="st">"n_cells"</span>})</span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>        .sort_values([<span class="st">"cell_type"</span>, <span class="st">"condition"</span>])</span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>pattern2_by_celltype</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="23d0c946" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> HAS_PATTERN_ACTIVITY_BY_CELLTYPE:</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    pattern2_by_celltype <span class="op">=</span> (</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>        pd.read_csv(PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>        .loc[<span class="kw">lambda</span> df: df[<span class="st">"pattern"</span>] <span class="op">==</span> <span class="st">"Pattern2"</span>]</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>        .sort_values([<span class="st">"cell_type"</span>, <span class="st">"condition"</span>])</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    pattern2_by_celltype <span class="op">=</span> (</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>        adata_with_patterns.obs.groupby([<span class="st">"cell_type"</span>, <span class="st">"condition"</span>], observed<span class="op">=</span><span class="va">True</span>)[<span class="st">"Pattern2"</span>]</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>        .agg([<span class="st">"mean"</span>, <span class="st">"median"</span>, <span class="st">"count"</span>])</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>        .reset_index()</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>        .rename(columns<span class="op">=</span>{<span class="st">"mean"</span>: <span class="st">"mean_activity"</span>, <span class="st">"median"</span>: <span class="st">"median_activity"</span>, <span class="st">"count"</span>: <span class="st">"n_cells"</span>})</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>        .sort_values([<span class="st">"cell_type"</span>, <span class="st">"condition"</span>])</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>pattern2_by_celltype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -2073,7 +2062,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">20</th>
+<td data-quarto-table-cell-role="th">20</td>
 <td>Pattern2</td>
 <td>B cells</td>
 <td>ctrl</td>
@@ -2082,7 +2071,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>1316</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">21</th>
+<td data-quarto-table-cell-role="th">21</td>
 <td>Pattern2</td>
 <td>B cells</td>
 <td>stim</td>
@@ -2091,7 +2080,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>1335</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">18</th>
+<td data-quarto-table-cell-role="th">18</td>
 <td>Pattern2</td>
 <td>CD14+ Monocytes</td>
 <td>ctrl</td>
@@ -2100,7 +2089,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>2932</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">19</th>
+<td data-quarto-table-cell-role="th">19</td>
 <td>Pattern2</td>
 <td>CD14+ Monocytes</td>
 <td>stim</td>
@@ -2109,7 +2098,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>2765</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">16</th>
+<td data-quarto-table-cell-role="th">16</td>
 <td>Pattern2</td>
 <td>CD4 T cells</td>
 <td>ctrl</td>
@@ -2118,7 +2107,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>5560</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">17</th>
+<td data-quarto-table-cell-role="th">17</td>
 <td>Pattern2</td>
 <td>CD4 T cells</td>
 <td>stim</td>
@@ -2127,7 +2116,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>5678</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">24</th>
+<td data-quarto-table-cell-role="th">24</td>
 <td>Pattern2</td>
 <td>CD8 T cells</td>
 <td>ctrl</td>
@@ -2136,7 +2125,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>811</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">25</th>
+<td data-quarto-table-cell-role="th">25</td>
 <td>Pattern2</td>
 <td>CD8 T cells</td>
 <td>stim</td>
@@ -2145,7 +2134,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>810</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">28</th>
+<td data-quarto-table-cell-role="th">28</td>
 <td>Pattern2</td>
 <td>Dendritic cells</td>
 <td>ctrl</td>
@@ -2154,7 +2143,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>258</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">29</th>
+<td data-quarto-table-cell-role="th">29</td>
 <td>Pattern2</td>
 <td>Dendritic cells</td>
 <td>stim</td>
@@ -2163,7 +2152,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>271</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">26</th>
+<td data-quarto-table-cell-role="th">26</td>
 <td>Pattern2</td>
 <td>FCGR3A+ Monocytes</td>
 <td>ctrl</td>
@@ -2172,7 +2161,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>520</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">27</th>
+<td data-quarto-table-cell-role="th">27</td>
 <td>Pattern2</td>
 <td>FCGR3A+ Monocytes</td>
 <td>stim</td>
@@ -2181,7 +2170,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>569</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">30</th>
+<td data-quarto-table-cell-role="th">30</td>
 <td>Pattern2</td>
 <td>Megakaryocytes</td>
 <td>ctrl</td>
@@ -2190,7 +2179,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>63</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">31</th>
+<td data-quarto-table-cell-role="th">31</td>
 <td>Pattern2</td>
 <td>Megakaryocytes</td>
 <td>stim</td>
@@ -2199,7 +2188,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>69</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">22</th>
+<td data-quarto-table-cell-role="th">22</td>
 <td>Pattern2</td>
 <td>NK cells</td>
 <td>ctrl</td>
@@ -2208,7 +2197,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>855</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">23</th>
+<td data-quarto-table-cell-role="th">23</td>
 <td>Pattern2</td>
 <td>NK cells</td>
 <td>stim</td>
@@ -2222,17 +2211,17 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </div>
 </div>
 </div>
-<div id="1b141183" class="cell" data-execution_count="28">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>plot_df <span class="op">=</span> pattern2_by_celltype.pivot(index<span class="op">=</span><span class="st">"cell_type"</span>, columns<span class="op">=</span><span class="st">"condition"</span>, values<span class="op">=</span><span class="st">"mean_activity"</span>)</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>plot_df <span class="op">=</span> plot_df.sort_values(by<span class="op">=</span>STIM_LABEL, ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plot_df.plot(kind<span class="op">=</span><span class="st">"bar"</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">4</span>))</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Mean Pattern2 activity"</span>)</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Cell type"</span>)</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Mean Pattern2 activity by cell type and condition"</span>)</span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="07bda3f6" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>plot_df <span class="op">=</span> pattern2_by_celltype.pivot(index<span class="op">=</span><span class="st">"cell_type"</span>, columns<span class="op">=</span><span class="st">"condition"</span>, values<span class="op">=</span><span class="st">"mean_activity"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>plot_df <span class="op">=</span> plot_df.sort_values(by<span class="op">=</span>STIM_LABEL, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plot_df.plot(kind<span class="op">=</span><span class="st">"bar"</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">4</span>))</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Mean Pattern2 activity"</span>)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Cell type"</span>)</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Mean Pattern2 activity by cell type and condition"</span>)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -2245,23 +2234,23 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </section>
 <section id="directionality-across-cell-types" class="level2">
 <h2 class="anchored" data-anchor-id="directionality-across-cell-types">Directionality across cell types</h2>
-<div id="77e29005" class="cell" data-execution_count="29">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>direction_celltype <span class="op">=</span> pd.read_csv(DIRECTION_CELLTYPE_CSV)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>pattern2_celltype_direction <span class="op">=</span> (</span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    direction_celltype.loc[direction_celltype[<span class="st">"pattern"</span>] <span class="op">==</span> <span class="st">"Pattern2"</span>]</span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    .groupby([<span class="st">"cell_type"</span>, <span class="st">"direction"</span>], observed<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    .size()</span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    .unstack(fill_value<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    .reset_index()</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>pattern2_celltype_direction</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="5d4f9729" class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>direction_celltype <span class="op">=</span> pd.read_csv(DIRECTION_CELLTYPE_CSV)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>pattern2_celltype_direction <span class="op">=</span> (</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    direction_celltype.loc[direction_celltype[<span class="st">"pattern"</span>] <span class="op">==</span> <span class="st">"Pattern2"</span>]</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    .groupby([<span class="st">"cell_type"</span>, <span class="st">"direction"</span>], observed<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    .size()</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    .unstack(fill_value<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    .reset_index()</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>pattern2_celltype_direction</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="27">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th">direction</th>
@@ -2272,49 +2261,49 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>B cells</td>
 <td>1</td>
 <td>14</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>CD14+ Monocytes</td>
 <td>1</td>
 <td>14</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>CD4 T cells</td>
 <td>1</td>
 <td>14</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
+<td data-quarto-table-cell-role="th">3</td>
 <td>CD8 T cells</td>
 <td>1</td>
 <td>14</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
+<td data-quarto-table-cell-role="th">4</td>
 <td>Dendritic cells</td>
 <td>1</td>
 <td>14</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">5</th>
+<td data-quarto-table-cell-role="th">5</td>
 <td>FCGR3A+ Monocytes</td>
 <td>1</td>
 <td>14</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">6</th>
+<td data-quarto-table-cell-role="th">6</td>
 <td>Megakaryocytes</td>
 <td>1</td>
 <td>14</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">7</th>
+<td data-quarto-table-cell-role="th">7</td>
 <td>NK cells</td>
 <td>1</td>
 <td>14</td>
@@ -2452,14 +2441,14 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </section>
 <section id="sweep-summary" class="level2">
 <h2 class="anchored" data-anchor-id="sweep-summary">Sweep summary</h2>
-<div id="71b33dae" class="cell" data-execution_count="30">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>summary_by_k <span class="op">=</span> pd.read_csv(SUMMARY_BY_K_CSV)</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>summary_by_k.sort_values([<span class="st">"K"</span>, <span class="st">"n_iter"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="12458975" class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>summary_by_k <span class="op">=</span> pd.read_csv(SUMMARY_BY_K_CSV)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>summary_by_k.sort_values([<span class="st">"K"</span>, <span class="st">"n_iter"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="28">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -2474,7 +2463,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>7</td>
 <td>2000</td>
 <td>5</td>
@@ -2484,7 +2473,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.923077</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>7</td>
 <td>10000</td>
 <td>5</td>
@@ -2494,7 +2483,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.923077</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>7</td>
 <td>20000</td>
 <td>5</td>
@@ -2504,7 +2493,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.923077</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
+<td data-quarto-table-cell-role="th">3</td>
 <td>9</td>
 <td>2000</td>
 <td>5</td>
@@ -2514,7 +2503,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.449275</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
+<td data-quarto-table-cell-role="th">4</td>
 <td>9</td>
 <td>10000</td>
 <td>5</td>
@@ -2524,7 +2513,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.960784</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">5</th>
+<td data-quarto-table-cell-role="th">5</td>
 <td>9</td>
 <td>20000</td>
 <td>5</td>
@@ -2534,7 +2523,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.851852</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">6</th>
+<td data-quarto-table-cell-role="th">6</td>
 <td>11</td>
 <td>2000</td>
 <td>5</td>
@@ -2544,7 +2533,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.785714</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">7</th>
+<td data-quarto-table-cell-role="th">7</td>
 <td>11</td>
 <td>10000</td>
 <td>5</td>
@@ -2554,7 +2543,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.562500</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">8</th>
+<td data-quarto-table-cell-role="th">8</td>
 <td>11</td>
 <td>20000</td>
 <td>5</td>
@@ -2564,7 +2553,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.886792</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">9</th>
+<td data-quarto-table-cell-role="th">9</td>
 <td>13</td>
 <td>2000</td>
 <td>5</td>
@@ -2574,7 +2563,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <td>0.639344</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">10</th>
+<td data-quarto-table-cell-role="th">10</td>
 <td>13</td>
 <td>10000</td>
 <td>5</td>
@@ -2594,17 +2583,17 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <section id="optional-command-line-workflow" class="level2">
 <h2 class="anchored" data-anchor-id="optional-command-line-workflow">Optional command-line workflow</h2>
 <p>The original project used SLURM scripts and helper Python scripts. These scripts are preserved in the source analysis folder and selected scripts are copied into this draft under <code>scripts/</code> for provenance.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate jobs table</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> make_cogaps_jobs_tsv.py</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare cached inputs and jobs on a cluster</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> prep_cogaps_cache_and_jobs_rhino_light.sbatch</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the array sweep</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> cogaps_sweep_array_singleprocess_rhino_light.sbatch</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate sweep results</span></span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> aggregate_cogaps_results_rhino_light.sbatch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate jobs table</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> make_cogaps_jobs_tsv.py</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare cached inputs and jobs on a cluster</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> prep_cogaps_cache_and_jobs_rhino_light.sbatch</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the array sweep</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> cogaps_sweep_array_singleprocess_rhino_light.sbatch</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate sweep results</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> aggregate_cogaps_results_rhino_light.sbatch</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This is cluster-specific workflow provenance. It is not intended to be a turnkey cross-cluster deployment guide.</p>
 </section>
 <section id="figures-for-model-selection-context" class="level2">
@@ -2626,24 +2615,24 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 <section id="session-info" class="level2">
 <h2 class="anchored" data-anchor-id="session-info"><strong>Session Info</strong></h2>
 <hr>
-<div id="95f90ebf" class="cell" data-execution_count="31">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> platform</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python:"</span>, sys.version)</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Platform:"</span>, platform.platform())</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> package_name <span class="kw">in</span> [<span class="st">"anndata"</span>, <span class="st">"pandas"</span>, <span class="st">"numpy"</span>, <span class="st">"scipy"</span>, <span class="st">"matplotlib"</span>]:</span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    module <span class="op">=</span> <span class="bu">__import__</span>(package_name)</span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(package_name, <span class="bu">getattr</span>(module, <span class="st">"__version__"</span>, <span class="st">"unknown"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="e620b6ba" class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> platform</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python:"</span>, sys.version)</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Platform:"</span>, platform.platform())</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> package_name <span class="kw">in</span> [<span class="st">"anndata"</span>, <span class="st">"pandas"</span>, <span class="st">"numpy"</span>, <span class="st">"scipy"</span>, <span class="st">"matplotlib"</span>]:</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    module <span class="op">=</span> <span class="bu">__import__</span>(package_name)</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(package_name, <span class="bu">getattr</span>(module, <span class="st">"__version__"</span>, <span class="st">"unknown"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python: 3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:34:53) [Clang 19.1.7 ]
-Platform: macOS-15.7.1-arm64-arm-64bit
-anndata 0.12.10
-pandas 2.3.3
-numpy 2.4.4
-scipy 1.17.1
-matplotlib 3.10.8</code></pre>
+<pre><code>Python: 3.10.12 (main, Jan 26 2026, 14:55:28) [GCC 11.4.0]
+Platform: Linux-6.17.0-1010-azure-x86_64-with-glibc2.35
+anndata 0.11.4
+pandas 2.0.3
+numpy 1.24.4
+scipy 1.15.3
+matplotlib 3.7.3</code></pre>
 </div>
 </div>
 </section>
@@ -2660,243 +2649,239 @@ matplotlib 3.10.8</code></pre>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
-        }
-      }
-      return false;
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
     }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
     }
-    const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
       for (const childEl of codeEl.children) {
         if (isCodeAnnotation(childEl)) {
           childEl.remove();
         }
       }
       return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
     });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
         }
       }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
-        },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
     }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
-      });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
     }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
-          }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
-            }
-          }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
-          }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
-          }
-          return note.innerHTML;
-        }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
       } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
         }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
       }
     }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
-            }
-          } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
-            });
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
           }
         } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
+          // See if we can fetch this
+          fetch(url.split('#')[0])
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
+            const note = htmlDoc.getElementById(id);
             if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
+              const html = processXRef(id, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -2904,161 +2889,185 @@ matplotlib 3.10.8</code></pre>
             instance.show();
           });
         }
-      }, function(instance) {
-      });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
-        };
-      }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
-            }
-          });
-        }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
       } else {
-        return undefined;
-      }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
             }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
         });
       }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
     }
-  });
-  </script>
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -3080,7 +3089,7 @@ matplotlib 3.10.8</code></pre>
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+<script>var lightboxQuarto = GLightbox({"descPosition":"bottom","closeEffect":"zoom","selector":".lightbox","openEffect":"zoom","loop":false});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
