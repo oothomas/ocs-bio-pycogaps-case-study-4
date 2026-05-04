@@ -1,12 +1,21 @@
 # **Data Import**
 ***
 
-We will start from a cached processed AnnData object. This keeps the focus of the case study on latent-variable analysis and interpretation rather than on rebuilding every preprocessing step from the original source files.
+We will start from a cached processed single-cell object. This keeps the focus of the case study on latent-variable analysis and interpretation rather than on rebuilding every preprocessing step from the original source files.
 
 ```{python}
 adata_cells = ad.read_h5ad(PREPROCESSED_H5AD)
 adata_cells
 ```
+
+<details><summary>R alternative: load the processed object with <code>zellkonverter</code></summary>
+
+```{r}
+sce_cells <- zellkonverter::readH5AD(PREPROCESSED_H5AD_R, reader = "R")
+sce_cells
+```
+
+</details>
 
 We need three metadata columns for the rest of the case study:
 
@@ -24,17 +33,45 @@ if missing_obs:
 adata_cells.obs[["condition", "cell_type", "replicate"]].head()
 ```
 
-The default path in this case study uses a saved chosen CoGAPS model. We check that it is available now and interpret it later.
+<details><summary>R alternative: verify required metadata columns</summary>
 
-```{python}
-print("Analysis mode:", ANALYSIS_MODE)
-print("Saved chosen model available:", HAS_CHOSEN_RESULT)
-print("Cached dense CoGAPS input available:", HAS_CACHED_COGAPS_INPUT)
-print("Chosen model metrics available:", CHOSEN_METRICS_JSON.exists())
-print("Lightweight pattern matrices available:", HAS_LIGHTWEIGHT_PATTERN_MATRICES)
-print("Lightweight pattern summary available:", HAS_PATTERN_SUMMARY)
+```{r}
+required_obs_r <- c("condition", "cell_type", "replicate")
+missing_obs_r <- setdiff(required_obs_r, colnames(colData(sce_cells)))
+
+if (length(missing_obs_r) > 0) {
+  stop(sprintf("Missing required metadata columns: %s", paste(missing_obs_r, collapse = ", ")))
+}
+
+as.data.frame(colData(sce_cells)[, required_obs_r]) |>
+  head()
 ```
 
-If the full chosen-model `.h5ad` file is not available, the case study falls back to lightweight exported pattern matrices and summary tables. That lightweight path is intended to keep GitHub and classroom renders informative without requiring the 600 MB result object.
+</details>
+
+The default path in this case study uses a saved chosen CoGAPS model. We check which saved artifacts are available now and interpret them later.
+
+```{python}
+print("Python analysis mode:", PY_ANALYSIS_MODE)
+print("Python saved chosen model available:", HAS_PY_CHOSEN_RESULT)
+print("Cached dense CoGAPS input available:", HAS_CACHED_COGAPS_INPUT)
+print("Python chosen model metrics available:", PY_CHOSEN_METRICS_JSON.exists())
+print("Python lightweight pattern matrices available:", HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES)
+print("Python lightweight pattern summary available:", HAS_PY_PATTERN_SUMMARY)
+```
+
+<details><summary>R alternative: inspect saved R artifacts</summary>
+
+```{r}
+cat("R analysis mode:", R_ANALYSIS_MODE_R, "\n")
+cat("R saved chosen model available:", HAS_R_CHOSEN_RESULT_R, "\n")
+cat("R chosen model metrics available:", file.exists(R_CHOSEN_METRICS_JSON_R), "\n")
+cat("R lightweight pattern matrices available:", HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R, "\n")
+cat("R lightweight pattern summary available:", HAS_R_PATTERN_SUMMARY_R, "\n")
+```
+
+</details>
+
+If the full chosen-model file is unavailable, the case study falls back to lightweight exported pattern matrices and summary tables. That fallback is intended to keep GitHub and classroom renders informative without requiring the large saved model objects.
 
 ***

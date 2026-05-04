@@ -3,6 +3,11 @@
 
 This section is the core of the case study. We will use the chosen CoGAPS model, inspect the pattern matrices, identify the IFN-associated pattern, and connect pattern genes to stimulation directionality.
 
+The Python and R analyses follow the same scientific path, but they use separately saved outputs:
+
+- Python artifacts live under `data/results_python/` with a legacy fallback to `data/results/`
+- R artifacts live under `data/results_r/`
+
 ## Why use `K = 7`?
 
 The full rank-selection sweep is not part of the main learner workflow. It was run beforehand as an instructor/reviewer-facing model-selection step. The selected model used `K = 7`, `seed = 2`, and `n_iter = 2000`.
@@ -12,17 +17,29 @@ summary_by_k = pd.read_csv(SUMMARY_BY_K_CSV)
 summary_by_k.sort_values(["K", "n_iter"]).head(10)
 ```
 
+<details><summary>R alternative: inspect the sweep summary table</summary>
+
+```{r}
+summary_by_k_r <- read.csv(resolve_first_existing_r(
+  file.path(PY_RESULTS_DIR_R, "summary_by_K.csv"),
+  file.path(LEGACY_RESULTS_DIR_R, "summary_by_K.csv")
+), stringsAsFactors = FALSE)
+summary_by_k_r[order(summary_by_k_r$K, summary_by_k_r$n_iter), ][1:10, ]
+```
+
+</details>
+
 For the selected `K = 7`, `n_iter = 2000` setting, the completed sweep summary showed strong IFN-pattern correlation stability and high top-gene overlap across seeds. This supports using `K = 7` for the teaching workflow, but it does not prove that `K = 7` is universally optimal.
 
 ## Load the chosen CoGAPS result or lightweight pattern exports
 
-The default learner path loads a saved chosen model. If that large `.h5ad` file is unavailable, this case study falls back to lightweight exported pattern matrices and summary tables so the main interpretation steps still render cleanly.
+The default learner path loads a saved chosen model. If that large full-result file is unavailable, this case study falls back to lightweight exported pattern matrices and summary tables so the main interpretation steps still render cleanly.
 
 ```{python}
 with open(CHOSEN_METRICS_JSON) as f:
     chosen_metrics = json.load(f)
 
-if HAS_CHOSEN_RESULT:
+if HAS_PY_CHOSEN_RESULT:
     result = ad.read_h5ad(CHOSEN_RESULT_H5AD)
     pattern_names = pattern_columns(result.obs)
     A = result.obs[pattern_names].copy()
@@ -33,11 +50,14 @@ if HAS_CHOSEN_RESULT:
     analysis_mode_label = "Full chosen-model H5AD"
 else:
     result = None
-    A, P = load_lightweight_pattern_matrices()
+    A, P = load_lightweight_pattern_matrices(
+        PY_PATTERN_GENE_WEIGHTS_TSV_GZ,
+        PY_PATTERN_CELL_ACTIVITIES_TSV_GZ,
+    )
     pattern_names = pattern_columns(A)
     analysis_mode_label = "Lightweight exported A/P matrices"
 
-print("Analysis mode:", analysis_mode_label)
+print("Python analysis mode:", analysis_mode_label)
 print("Pattern columns:", pattern_names)
 print("A matrix shape:", A.shape)
 print("P matrix shape:", P.shape)
@@ -46,11 +66,83 @@ print("IFN correlation:", round(chosen_metrics["ifn_corr"], 4))
 print("Runtime in original environment, minutes:", round(chosen_metrics["runtime_sec"] / 60, 1))
 ```
 
+<details><summary>R alternative: load the chosen R result or lightweight R exports</summary>
+
+```{r}
+chosen_metrics_r <- NULL
+A_r <- NULL
+P_r <- NULL
+pattern_names_r <- character()
+
+if (file.exists(R_CHOSEN_METRICS_JSON_R)) {
+  chosen_metrics_r <- jsonlite::read_json(R_CHOSEN_METRICS_JSON_R, simplifyVector = TRUE)
+}
+
+if (HAS_R_CHOSEN_RESULT_R) {
+  result_r <- readRDS(R_CHOSEN_RESULT_RDS_R)
+  A_r <- as.matrix(CoGAPS::getFeatureLoadings(result_r))
+  P_r <- as.matrix(CoGAPS::getSampleFactors(result_r))
+
+  if (nrow(A_r) != nrow(sce_cells) && ncol(A_r) == nrow(sce_cells)) {
+    A_r <- t(A_r)
+  }
+  if (nrow(P_r) != ncol(sce_cells) && ncol(P_r) == ncol(sce_cells)) {
+    P_r <- t(P_r)
+  }
+
+  if (is.null(rownames(A_r))) {
+    rownames(A_r) <- rownames(sce_cells)
+  }
+  if (is.null(rownames(P_r))) {
+    rownames(P_r) <- colnames(sce_cells)
+  }
+  if (is.null(colnames(A_r))) {
+    colnames(A_r) <- sprintf("Pattern%d", seq_len(ncol(A_r)))
+  } else {
+    colnames(A_r) <- canonicalize_pattern_names_r(colnames(A_r))
+  }
+  if (is.null(colnames(P_r))) {
+    colnames(P_r) <- sprintf("Pattern%d", seq_len(ncol(P_r)))
+  } else {
+    colnames(P_r) <- canonicalize_pattern_names_r(colnames(P_r))
+  }
+
+  pattern_names_r <- pattern_columns_r(colnames(A_r))
+  analysis_mode_label_r <- "Full chosen-model RDS"
+} else if (HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R) {
+  lightweight_r <- load_lightweight_pattern_matrices_r(
+    R_PATTERN_GENE_WEIGHTS_TSV_GZ_R,
+    R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R
+  )
+  A_r <- as.matrix(lightweight_r$A)
+  P_r <- as.matrix(lightweight_r$P)
+  pattern_names_r <- pattern_columns_r(colnames(A_r))
+  analysis_mode_label_r <- "Lightweight exported A/P matrices"
+} else {
+  result_r <- NULL
+  analysis_mode_label_r <- "Unavailable"
+}
+
+cat("R analysis mode:", analysis_mode_label_r, "\n")
+if (length(pattern_names_r) > 0) {
+  cat("Pattern columns:", paste(pattern_names_r, collapse = ", "), "\n")
+  cat("A matrix shape:", paste(dim(A_r), collapse = " x "), "\n")
+  cat("P matrix shape:", paste(dim(P_r), collapse = " x "), "\n")
+}
+if (!is.null(chosen_metrics_r)) {
+  cat("IFN-associated pattern from metrics:", chosen_metrics_r$ifn_pattern, "\n")
+  cat("IFN correlation:", round(chosen_metrics_r$ifn_corr, 4), "\n")
+  cat("Runtime in original environment, minutes:", round(chosen_metrics_r$runtime_sec / 60, 1), "\n")
+}
+```
+
+</details>
+
 ::: {.column-margin}
-The saved model path is the recommended default. A local model run is useful for advanced learners, but it can take substantial time. The lightweight exports are mainly for GitHub/classroom rendering and should match the saved chosen model.
+The saved model path is the recommended default. A local model run is useful for advanced learners, but it can take substantial time. The lightweight exports are mainly for GitHub/classroom rendering and should match the saved chosen model within each language-specific implementation.
 :::
 
-<details><summary>Optional: run one single-process chosen-`K` model locally</summary>
+<details><summary>Optional: run one single-process chosen-<code>K</code> model locally in Python</summary>
 
 The code below shows the intended local-run path. It is not evaluated by default in this draft because it can take substantial time and depends on the local `PyCoGAPS` installation.
 
@@ -71,9 +163,31 @@ result = CoGAPS(str(COGAPS_INPUT_H5AD), params)
 
 </details>
 
+<details><summary>Optional: run one single-process chosen-<code>K</code> model locally in R</summary>
+
+The R path uses the same parameter values, but it runs the official Bioconductor `CoGAPS` package and saves a separate `.rds` result under `data/results_r/`.
+
+```{r}
+#| eval: false
+params_r <- CoGAPS::CogapsParams(
+  nPatterns = CHOSEN_K_R,
+  nIterations = CHOSEN_ITER_R,
+  seed = CHOSEN_SEED_R,
+  sparseOptimization = TRUE
+)
+
+cogaps_input_dense_r <- as.matrix(assay(sce_cells, "X"))
+storage.mode(cogaps_input_dense_r) <- "double"
+
+result_r <- CoGAPS::CoGAPS(cogaps_input_dense_r, params_r, nThreads = 1)
+saveRDS(result_r, R_CHOSEN_RESULT_RDS_R)
+```
+
+</details>
+
 ## Extract the `A` and `P` matrices
 
-The chosen result stores gene weights and cell activities as pattern columns. In the saved result, `result.obs` contains gene weights and `result.var` contains cell activities. The lightweight fallback stores those same matrices as small tabular files.
+The chosen result stores gene weights and cell activities as pattern columns. In the saved Python result, `result.obs` contains gene weights and `result.var` contains cell activities. The lightweight fallback stores those same matrices as small tabular files.
 
 ```{python}
 adata_with_patterns = adata_cells.copy()
@@ -89,6 +203,24 @@ for pattern in pattern_names:
 adata_with_patterns.obs[["condition", "cell_type", *pattern_names]].head()
 ```
 
+<details><summary>R alternative: attach pattern activities to cell metadata</summary>
+
+```{r}
+if (!is.null(P_r)) {
+  cell_meta_r <- as.data.frame(colData(sce_cells))
+  P_r <- P_r[colnames(sce_cells), , drop = FALSE]
+  adata_with_patterns_r <- cbind(
+    cell_meta_r[, c("condition", "cell_type", "replicate"), drop = FALSE],
+    as.data.frame(P_r, check.names = FALSE)
+  )
+  head(adata_with_patterns_r[, c("condition", "cell_type", pattern_names_r), drop = FALSE])
+} else {
+  cat("R pattern activity matrix is not available in this render context.\n")
+}
+```
+
+</details>
+
 ## Identify the IFN-associated pattern
 
 We identify the stimulation-associated pattern by correlating each pattern's cell activity with a binary stimulation indicator.
@@ -103,13 +235,13 @@ pattern_corrs = pd.Series(
 pattern_corrs
 ```
 
-Pattern2 is the strongest IFN-associated pattern in this chosen model.
+Pattern2 is the strongest IFN-associated pattern in the saved Python model.
 
 If a cached lightweight correlation table is available, we can confirm that it matches the current render context.
 
 ```{python}
-if HAS_PATTERN_CORRELATIONS:
-    cached_pattern_corrs = pd.read_csv(PATTERN_CORRELATIONS_CSV)
+if HAS_PY_PATTERN_CORRELATIONS:
+    cached_pattern_corrs = pd.read_csv(PY_PATTERN_CORRELATIONS_CSV)
     corr_check = (
         cached_pattern_corrs.set_index("pattern")["corr_with_stim"]
         .reindex(pattern_corrs.index)
@@ -122,6 +254,31 @@ else:
     print("Cached pattern_correlations.csv not available.")
 ```
 
+<details><summary>R alternative: identify the IFN-associated pattern</summary>
+
+```{r}
+if (!is.null(P_r)) {
+  stim_indicator_r <- as.integer(adata_with_patterns_r$condition == STIM_LABEL_R)
+  pattern_corrs_r <- setNames(
+    vapply(pattern_names_r, function(pattern) cor(P_r[, pattern], stim_indicator_r), numeric(1)),
+    pattern_names_r
+  )
+  pattern_corrs_r <- sort(pattern_corrs_r, decreasing = TRUE)
+  pattern_corrs_r
+
+  if (HAS_R_PATTERN_CORRELATIONS_R) {
+    cached_pattern_corrs_r <- read.csv(R_PATTERN_CORRELATIONS_CSV_R, stringsAsFactors = FALSE)
+    cached_lookup_r <- setNames(cached_pattern_corrs_r$corr_with_stim, cached_pattern_corrs_r$pattern)
+    corr_check_r <- max(abs(cached_lookup_r[names(pattern_corrs_r)] - pattern_corrs_r), na.rm = TRUE)
+    cat("Max absolute difference from cached R pattern_correlations.csv:", round(corr_check_r, 10), "\n")
+  }
+} else {
+  cat("R pattern correlations are unavailable because the R result artifacts are missing.\n")
+}
+```
+
+</details>
+
 ## Inspect top genes for Pattern2
 
 ```{python}
@@ -132,6 +289,19 @@ pattern2_top_genes
 The top Pattern2 genes include canonical interferon-stimulated genes such as `ISG15`, `ISG20`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `IFIT2`, `IRF7`, `OAS1`, `PLSCR1`, and `BST2`. This supports interpreting Pattern2 as an IFN-associated program.
 
 However, pattern weights alone do not tell us whether those genes are up or down in stimulated cells.
+
+<details><summary>R alternative: inspect top genes for Pattern2</summary>
+
+```{r}
+if (!is.null(A_r)) {
+  pattern2_top_genes_r <- top_genes_from_matrix_r(A_r, "Pattern2", n = 15)
+  pattern2_top_genes_r
+} else {
+  cat("R top-gene inspection is unavailable because the R result artifacts are missing.\n")
+}
+```
+
+</details>
 
 :::{.think_question}
 ::::{.think_question_header}
@@ -147,10 +317,10 @@ No. A high CoGAPS weight means the gene helps define the pattern. To determine u
 
 ## Add directionality for Pattern2 genes
 
-We answer the directionality question using a targeted paired pseudobulk analysis. The directionality table was generated from raw counts in `.layers["counts"]` by aggregating cells within donor and condition, computing `log2(stim CPM + 0.5) - log2(ctrl CPM + 0.5)`, and summarizing across donors.
+We answer the directionality question using a targeted paired pseudobulk analysis. The directionality table was generated from raw counts by aggregating cells within donor and condition, computing `log2(stim CPM + 0.5) - log2(ctrl CPM + 0.5)`, and summarizing across donors.
 
 ```{python}
-direction_global = pd.read_csv(DIRECTION_GLOBAL_CSV)
+direction_global = pd.read_csv(PY_DIRECTION_GLOBAL_CSV)
 
 pattern2_direction = (
     direction_global.loc[direction_global["pattern"] == "Pattern2"]
@@ -170,13 +340,37 @@ pattern2_direction = (
 pattern2_direction
 ```
 
-In the current directionality analysis, 14 of the top 15 Pattern2 genes are up in IFN-beta stimulation. `FTH1` is the exception and is down in stimulation. This distinction matters: `FTH1` contributes to the pattern, but it should not be described as an up-regulated IFN-stimulated gene in this dataset.
+In the current Python directionality analysis, 14 of the top 15 Pattern2 genes are up in IFN-beta stimulation. `FTH1` is the exception and is down in stimulation. This distinction matters: `FTH1` contributes to the pattern, but it should not be described as an up-regulated IFN-stimulated gene in this dataset.
+
+<details><summary>R alternative: add directionality for Pattern2 genes</summary>
+
+```{r}
+if (file.exists(R_DIRECTION_GLOBAL_CSV_R)) {
+  direction_global_r <- read.csv(R_DIRECTION_GLOBAL_CSV_R, stringsAsFactors = FALSE)
+  pattern2_direction_r <- subset(direction_global_r, pattern == "Pattern2")
+  pattern2_direction_r <- pattern2_direction_r[order(pattern2_direction_r$rank), c(
+    "rank",
+    "gene",
+    "mean_log2fc_stim_vs_ctrl",
+    "n_up_pairs",
+    "n_down_pairs",
+    "wilcoxon_fdr",
+    "direction",
+    "evidence_strength"
+  )]
+  pattern2_direction_r
+} else {
+  cat("R directionality outputs are unavailable in this render context.\n")
+}
+```
+
+</details>
 
 ## Summarize all patterns
 
 ```{python}
-if HAS_PATTERN_SUMMARY:
-    pattern_summary = pd.read_csv(PATTERN_SUMMARY_CSV)
+if HAS_PY_PATTERN_SUMMARY:
+    pattern_summary = pd.read_csv(PY_PATTERN_SUMMARY_CSV)
 else:
     pattern_summary_rows = []
     for pattern in pattern_names:
@@ -204,12 +398,41 @@ Pattern7 is also stimulation-associated and includes genes such as `CXCL10`, `AP
 
 Pattern1 has myeloid anchors such as `MS4A7`, `TYROBP`, `FCGR3A`, `FCER1G`, and `CTSS`. Pattern6 includes antigen-presentation genes such as `CD74`, `HLA-DRA`, `HLA-DRB1`, `HLA-DPA1`, `HLA-DPB1`, and `HLA-DQA1`. These patterns are useful context for identity-like or compartment-linked structure, but their biological labels should remain cautious.
 
+<details><summary>R alternative: summarize all patterns</summary>
+
+```{r}
+if (HAS_R_PATTERN_SUMMARY_R) {
+  pattern_summary_r <- read.csv(R_PATTERN_SUMMARY_CSV_R, stringsAsFactors = FALSE)
+  pattern_summary_r
+} else if (!is.null(A_r) && !is.null(P_r)) {
+  pattern_summary_r <- do.call(
+    rbind,
+    lapply(pattern_names_r, function(pattern) {
+      top8 <- head(top_genes_from_matrix_r(A_r, pattern, n = 8)$gene, 8)
+      dominant_cell_type <- names(sort(tapply(P_r[, pattern], adata_with_patterns_r$cell_type, mean), decreasing = TRUE))[1]
+      data.frame(
+        pattern = pattern,
+        corr_with_stim = round(pattern_corrs_r[[pattern]], 4),
+        dominant_cell_type = dominant_cell_type,
+        top_genes_top8 = paste(top8, collapse = ", "),
+        row.names = NULL
+      )
+    })
+  )
+  pattern_summary_r
+} else {
+  cat("R pattern summaries are unavailable in this render context.\n")
+}
+```
+
+</details>
+
 ## Pattern2 across cell types
 
 ```{python}
-if HAS_PATTERN_ACTIVITY_BY_CELLTYPE:
+if HAS_PY_PATTERN_ACTIVITY_BY_CELLTYPE:
     pattern2_by_celltype = (
-        pd.read_csv(PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)
+        pd.read_csv(PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)
         .loc[lambda df: df["pattern"] == "Pattern2"]
         .sort_values(["cell_type", "condition"])
     )
@@ -240,10 +463,59 @@ plt.show()
 
 Pattern2 activity is broad across PBMC cell types but not uniform. This supports an activity-like interpretation: the pattern is not simply a marker of one immune cell type.
 
+<details><summary>R alternative: Pattern2 across cell types</summary>
+
+```{r}
+if (HAS_R_PATTERN_ACTIVITY_BY_CELLTYPE_R) {
+  pattern2_by_celltype_r <- subset(
+    read.csv(R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV_R, stringsAsFactors = FALSE),
+    pattern == "Pattern2"
+  )
+} else if (!is.null(P_r)) {
+  tmp_r <- aggregate(
+    P_r[, "Pattern2"],
+    by = list(cell_type = adata_with_patterns_r$cell_type, condition = adata_with_patterns_r$condition),
+    FUN = function(x) c(mean = mean(x), median = median(x), n_cells = length(x))
+  )
+  stats_r <- do.call(rbind, tmp_r$x)
+  pattern2_by_celltype_r <- data.frame(
+    pattern = "Pattern2",
+    cell_type = tmp_r$cell_type,
+    condition = tmp_r$condition,
+    mean_activity = stats_r[, "mean"],
+    median_activity = stats_r[, "median"],
+    n_cells = stats_r[, "n_cells"],
+    row.names = NULL
+  )
+} else {
+  pattern2_by_celltype_r <- NULL
+}
+
+if (!is.null(pattern2_by_celltype_r)) {
+  pattern2_by_celltype_r[order(pattern2_by_celltype_r$cell_type, pattern2_by_celltype_r$condition), ]
+}
+```
+
+```{r}
+if (!is.null(pattern2_by_celltype_r)) {
+  ggplot(pattern2_by_celltype_r, aes(x = cell_type, y = mean_activity, fill = condition)) +
+    geom_col(position = "dodge") +
+    labs(
+      title = "Mean Pattern2 activity by cell type and condition",
+      x = "Cell type",
+      y = "Mean Pattern2 activity"
+    ) +
+    theme_minimal(base_size = 11) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+```
+
+</details>
+
 ## Directionality across cell types
 
 ```{python}
-direction_celltype = pd.read_csv(DIRECTION_CELLTYPE_CSV)
+direction_celltype = pd.read_csv(PY_DIRECTION_CELLTYPE_CSV)
 
 pattern2_celltype_direction = (
     direction_celltype.loc[direction_celltype["pattern"] == "Pattern2"]
@@ -256,6 +528,25 @@ pattern2_celltype_direction = (
 pattern2_celltype_direction
 ```
 
-In each annotated cell type, 14 of the top 15 Pattern2 genes are up in stimulation under the targeted pseudobulk summary, while `FTH1` is down. This reinforces the interpretation that Pattern2 captures a broad IFN-beta response, while also reminding us that the analysis is targeted and descriptive.
+In each annotated cell type, most top Pattern2 genes are up in stimulation under the targeted pseudobulk summary, while `FTH1` remains the main down-in-stimulation exception. This reinforces the interpretation that Pattern2 captures a broad IFN-beta response, while also reminding us that the analysis is targeted and descriptive.
+
+<details><summary>R alternative: directionality across cell types</summary>
+
+```{r}
+if (file.exists(R_DIRECTION_CELLTYPE_CSV_R)) {
+  direction_celltype_r <- read.csv(R_DIRECTION_CELLTYPE_CSV_R, stringsAsFactors = FALSE)
+  pattern2_celltype_direction_r <- subset(direction_celltype_r, pattern == "Pattern2")
+  pattern2_celltype_direction_r <- as.data.frame.matrix(
+    table(pattern2_celltype_direction_r$cell_type, pattern2_celltype_direction_r$direction)
+  )
+  pattern2_celltype_direction_r$cell_type <- rownames(pattern2_celltype_direction_r)
+  rownames(pattern2_celltype_direction_r) <- NULL
+  pattern2_celltype_direction_r
+} else {
+  cat("R by-cell-type directionality outputs are unavailable in this render context.\n")
+}
+```
+
+</details>
 
 ***

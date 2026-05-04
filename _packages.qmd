@@ -1,7 +1,14 @@
 # **Packages**
 ***
 
-We will begin by loading the Python packages that we need for this case study.
+This case study now supports two parallel implementations:
+
+- a Python pathway built around `AnnData` and `PyCoGAPS`
+- an R pathway built around `SingleCellExperiment` and Bioconductor `CoGAPS`
+
+The scientific workflow is the same in both languages, but saved CoGAPS outputs are kept separate because the two implementations should be treated as parallel analyses rather than numerically identical reruns.
+
+## Python packages
 
 ```{python}
 from __future__ import annotations
@@ -25,9 +32,39 @@ Package | Use
 [`numpy`](https://numpy.org/){target="_blank"} | Matrix and numerical operations
 [`scipy`](https://scipy.org/){target="_blank"} | Sparse matrix handling and statistical summaries
 [`matplotlib`](https://matplotlib.org/){target="_blank"} | Plot figures used in the case study
-[`PyCoGAPS`](https://github.com/FertigLab/pycogaps){target="_blank"} | Optional local CoGAPS model execution
+[`PyCoGAPS`](https://github.com/FertigLab/pycogaps){target="_blank"} | Optional local CoGAPS model execution in Python
 
-We will also define paths and helper functions that will be reused across sections.
+## R alternative packages
+
+<details><summary>R alternative: load Bioconductor and tidyverse packages</summary>
+
+```{r}
+suppressPackageStartupMessages({
+  library(zellkonverter)
+  library(SingleCellExperiment)
+  library(SummarizedExperiment)
+  library(CoGAPS)
+  library(jsonlite)
+  library(ggplot2)
+  library(dplyr)
+  library(tibble)
+  library(readr)
+})
+```
+
+Package | Use
+------- | ---
+`zellkonverter` | Read `.h5ad` files into `SingleCellExperiment`
+`SingleCellExperiment` | Represent single-cell data in Bioconductor form
+`SummarizedExperiment` | Access assays and metadata cleanly
+`CoGAPS` | Optional local CoGAPS model execution in R
+`jsonlite` | Read saved metrics JSON files
+`ggplot2` | Plot figures in the R workflow
+`dplyr`, `tibble`, `readr` | Summaries and lightweight artifact I/O
+
+</details>
+
+We will also define reusable paths and helper functions in both languages.
 
 ```{python}
 def find_project_root(start: Path) -> Path:
@@ -37,26 +74,97 @@ def find_project_root(start: Path) -> Path:
     raise FileNotFoundError("Could not locate the case-study project root.")
 
 
-ROOT = find_project_root(Path.cwd())
+def resolve_first_existing(*candidates: Path) -> Path:
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
 
-PREPROCESSED_H5AD = ROOT / "data/processed/preprocessed_cells_hvg3000.h5ad"
-COGAPS_INPUT_H5AD = ROOT / "data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad"
-PREPROCESS_CONFIG_JSON = ROOT / "data/processed/preprocess_config_hvg3000.json"
-CHOSEN_RESULT_H5AD = ROOT / "data/results/cogaps_K7_seed2_iter2000.h5ad"
-CHOSEN_METRICS_JSON = ROOT / "data/results/cogaps_K7_seed2_iter2000.metrics.json"
-SUMMARY_BY_K_CSV = ROOT / "data/results/summary_by_K.csv"
-PER_RUN_METRICS_CSV = ROOT / "data/results/per_run_metrics.csv"
-DIRECTION_GLOBAL_CSV = ROOT / "data/results/pattern_gene_directionality_global.csv"
-DIRECTION_CELLTYPE_CSV = ROOT / "data/results/pattern_gene_directionality_by_celltype.csv"
-DIRECTION_SUMMARY_CSV = ROOT / "data/results/pattern_direction_summary.csv"
-PATTERN_GENE_WEIGHTS_TSV_GZ = ROOT / "data/results/pattern_gene_weights.tsv.gz"
-PATTERN_CELL_ACTIVITIES_TSV_GZ = ROOT / "data/results/pattern_cell_activities.tsv.gz"
-PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ = ROOT / "data/results/pattern_cell_activities_with_metadata.csv.gz"
-PATTERN_TOP_GENES_CSV = ROOT / "data/results/pattern_top_genes.csv"
-PATTERN_CORRELATIONS_CSV = ROOT / "data/results/pattern_correlations.csv"
-PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV = ROOT / "data/results/pattern_activity_by_celltype_condition.csv"
-PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV = ROOT / "data/results/pattern_activity_by_replicate_condition.csv"
-PATTERN_SUMMARY_CSV = ROOT / "data/results/pattern_summary.csv"
+
+ROOT = find_project_root(Path.cwd())
+PROCESSED_DIR = ROOT / "data" / "processed"
+LEGACY_RESULTS_DIR = ROOT / "data" / "results"
+PY_RESULTS_DIR = ROOT / "data" / "results_python"
+R_RESULTS_DIR = ROOT / "data" / "results_r"
+
+PREPROCESSED_H5AD = PROCESSED_DIR / "preprocessed_cells_hvg3000.h5ad"
+COGAPS_INPUT_H5AD = PROCESSED_DIR / "cogaps_input_genesxcells_hvg3000_float64.h5ad"
+PREPROCESS_CONFIG_JSON = PROCESSED_DIR / "preprocess_config_hvg3000.json"
+
+PY_CHOSEN_RESULT_H5AD = resolve_first_existing(
+    PY_RESULTS_DIR / "cogaps_K7_seed2_iter2000.h5ad",
+    LEGACY_RESULTS_DIR / "cogaps_K7_seed2_iter2000.h5ad",
+)
+PY_CHOSEN_METRICS_JSON = resolve_first_existing(
+    PY_RESULTS_DIR / "cogaps_K7_seed2_iter2000.metrics.json",
+    LEGACY_RESULTS_DIR / "cogaps_K7_seed2_iter2000.metrics.json",
+)
+PY_SUMMARY_BY_K_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "summary_by_K.csv",
+    LEGACY_RESULTS_DIR / "summary_by_K.csv",
+)
+PY_PER_RUN_METRICS_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "per_run_metrics.csv",
+    LEGACY_RESULTS_DIR / "per_run_metrics.csv",
+)
+PY_DIRECTION_GLOBAL_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_gene_directionality_global.csv",
+    LEGACY_RESULTS_DIR / "pattern_gene_directionality_global.csv",
+)
+PY_DIRECTION_CELLTYPE_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_gene_directionality_by_celltype.csv",
+    LEGACY_RESULTS_DIR / "pattern_gene_directionality_by_celltype.csv",
+)
+PY_DIRECTION_SUMMARY_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_direction_summary.csv",
+    LEGACY_RESULTS_DIR / "pattern_direction_summary.csv",
+)
+PY_PATTERN_GENE_WEIGHTS_TSV_GZ = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_gene_weights.tsv.gz",
+    LEGACY_RESULTS_DIR / "pattern_gene_weights.tsv.gz",
+)
+PY_PATTERN_CELL_ACTIVITIES_TSV_GZ = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_cell_activities.tsv.gz",
+    LEGACY_RESULTS_DIR / "pattern_cell_activities.tsv.gz",
+)
+PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_cell_activities_with_metadata.csv.gz",
+    LEGACY_RESULTS_DIR / "pattern_cell_activities_with_metadata.csv.gz",
+)
+PY_PATTERN_TOP_GENES_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_top_genes.csv",
+    LEGACY_RESULTS_DIR / "pattern_top_genes.csv",
+)
+PY_PATTERN_CORRELATIONS_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_correlations.csv",
+    LEGACY_RESULTS_DIR / "pattern_correlations.csv",
+)
+PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_activity_by_celltype_condition.csv",
+    LEGACY_RESULTS_DIR / "pattern_activity_by_celltype_condition.csv",
+)
+PY_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_activity_by_replicate_condition.csv",
+    LEGACY_RESULTS_DIR / "pattern_activity_by_replicate_condition.csv",
+)
+PY_PATTERN_SUMMARY_CSV = resolve_first_existing(
+    PY_RESULTS_DIR / "pattern_summary.csv",
+    LEGACY_RESULTS_DIR / "pattern_summary.csv",
+)
+
+R_CHOSEN_RESULT_RDS = R_RESULTS_DIR / "cogaps_K7_seed2_iter2000.rds"
+R_CHOSEN_METRICS_JSON = R_RESULTS_DIR / "cogaps_K7_seed2_iter2000.metrics.json"
+R_PATTERN_GENE_WEIGHTS_TSV_GZ = R_RESULTS_DIR / "pattern_gene_weights.tsv.gz"
+R_PATTERN_CELL_ACTIVITIES_TSV_GZ = R_RESULTS_DIR / "pattern_cell_activities.tsv.gz"
+R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ = R_RESULTS_DIR / "pattern_cell_activities_with_metadata.csv.gz"
+R_PATTERN_TOP_GENES_CSV = R_RESULTS_DIR / "pattern_top_genes.csv"
+R_PATTERN_CORRELATIONS_CSV = R_RESULTS_DIR / "pattern_correlations.csv"
+R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV = R_RESULTS_DIR / "pattern_activity_by_celltype_condition.csv"
+R_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV = R_RESULTS_DIR / "pattern_activity_by_replicate_condition.csv"
+R_PATTERN_SUMMARY_CSV = R_RESULTS_DIR / "pattern_summary.csv"
+R_DIRECTION_GLOBAL_CSV = R_RESULTS_DIR / "pattern_gene_directionality_global.csv"
+R_DIRECTION_CELLTYPE_CSV = R_RESULTS_DIR / "pattern_gene_directionality_by_celltype.csv"
+R_DIRECTION_SUMMARY_CSV = R_RESULTS_DIR / "pattern_direction_summary.csv"
 
 CHOSEN_K = 7
 CHOSEN_SEED = 2
@@ -64,26 +172,61 @@ CHOSEN_ITER = 2000
 STIM_LABEL = "stim"
 
 HAS_CACHED_COGAPS_INPUT = COGAPS_INPUT_H5AD.exists()
-HAS_CHOSEN_RESULT = CHOSEN_RESULT_H5AD.exists()
-HAS_LIGHTWEIGHT_PATTERN_MATRICES = (
-    PATTERN_GENE_WEIGHTS_TSV_GZ.exists() and PATTERN_CELL_ACTIVITIES_TSV_GZ.exists()
-)
-HAS_LIGHTWEIGHT_ACTIVITY_METADATA = PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ.exists()
-HAS_PATTERN_TOP_GENES = PATTERN_TOP_GENES_CSV.exists()
-HAS_PATTERN_CORRELATIONS = PATTERN_CORRELATIONS_CSV.exists()
-HAS_PATTERN_ACTIVITY_BY_CELLTYPE = PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV.exists()
-HAS_PATTERN_SUMMARY = PATTERN_SUMMARY_CSV.exists()
 
-ANALYSIS_MODE = (
+HAS_PY_CHOSEN_RESULT = PY_CHOSEN_RESULT_H5AD.exists()
+HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES = (
+    PY_PATTERN_GENE_WEIGHTS_TSV_GZ.exists() and PY_PATTERN_CELL_ACTIVITIES_TSV_GZ.exists()
+)
+HAS_PY_LIGHTWEIGHT_ACTIVITY_METADATA = PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ.exists()
+HAS_PY_PATTERN_TOP_GENES = PY_PATTERN_TOP_GENES_CSV.exists()
+HAS_PY_PATTERN_CORRELATIONS = PY_PATTERN_CORRELATIONS_CSV.exists()
+HAS_PY_PATTERN_ACTIVITY_BY_CELLTYPE = PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV.exists()
+HAS_PY_PATTERN_SUMMARY = PY_PATTERN_SUMMARY_CSV.exists()
+
+HAS_R_CHOSEN_RESULT = R_CHOSEN_RESULT_RDS.exists()
+HAS_R_LIGHTWEIGHT_PATTERN_MATRICES = (
+    R_PATTERN_GENE_WEIGHTS_TSV_GZ.exists() and R_PATTERN_CELL_ACTIVITIES_TSV_GZ.exists()
+)
+HAS_R_LIGHTWEIGHT_ACTIVITY_METADATA = R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ.exists()
+HAS_R_PATTERN_TOP_GENES = R_PATTERN_TOP_GENES_CSV.exists()
+HAS_R_PATTERN_CORRELATIONS = R_PATTERN_CORRELATIONS_CSV.exists()
+HAS_R_PATTERN_ACTIVITY_BY_CELLTYPE = R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV.exists()
+HAS_R_PATTERN_SUMMARY = R_PATTERN_SUMMARY_CSV.exists()
+
+PY_ANALYSIS_MODE = (
     "full_chosen_result"
-    if HAS_CHOSEN_RESULT
+    if HAS_PY_CHOSEN_RESULT
     else "lightweight_derived"
-    if HAS_LIGHTWEIGHT_PATTERN_MATRICES
+    if HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES
     else "unavailable"
 )
-```
+R_ANALYSIS_MODE = (
+    "full_chosen_result"
+    if HAS_R_CHOSEN_RESULT
+    else "lightweight_derived"
+    if HAS_R_LIGHTWEIGHT_PATTERN_MATRICES
+    else "unavailable"
+)
 
-```{python}
+# Backward-compatible aliases used by the Python chunks below.
+CHOSEN_RESULT_H5AD = PY_CHOSEN_RESULT_H5AD
+CHOSEN_METRICS_JSON = PY_CHOSEN_METRICS_JSON
+SUMMARY_BY_K_CSV = PY_SUMMARY_BY_K_CSV
+PER_RUN_METRICS_CSV = PY_PER_RUN_METRICS_CSV
+DIRECTION_GLOBAL_CSV = PY_DIRECTION_GLOBAL_CSV
+DIRECTION_CELLTYPE_CSV = PY_DIRECTION_CELLTYPE_CSV
+DIRECTION_SUMMARY_CSV = PY_DIRECTION_SUMMARY_CSV
+PATTERN_GENE_WEIGHTS_TSV_GZ = PY_PATTERN_GENE_WEIGHTS_TSV_GZ
+PATTERN_CELL_ACTIVITIES_TSV_GZ = PY_PATTERN_CELL_ACTIVITIES_TSV_GZ
+PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ = PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ
+PATTERN_TOP_GENES_CSV = PY_PATTERN_TOP_GENES_CSV
+PATTERN_CORRELATIONS_CSV = PY_PATTERN_CORRELATIONS_CSV
+PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV = PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV
+PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV = PY_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV
+PATTERN_SUMMARY_CSV = PY_PATTERN_SUMMARY_CSV
+ANALYSIS_MODE = PY_ANALYSIS_MODE
+
+
 def pattern_columns(df: pd.DataFrame) -> list[str]:
     return sorted(
         [c for c in df.columns if str(c).startswith("Pattern")],
@@ -91,16 +234,16 @@ def pattern_columns(df: pd.DataFrame) -> list[str]:
     )
 
 
-def top_genes_from_matrix(A: pd.DataFrame, pattern: str, n: int = 15) -> pd.DataFrame:
-    top = A[pattern].sort_values(ascending=False).head(n)
+def top_genes_from_matrix(matrix: pd.DataFrame, pattern: str, n: int = 15) -> pd.DataFrame:
+    top = matrix[pattern].sort_values(ascending=False).head(n)
     top_df = top.rename("weight").reset_index()
     top_df.columns = ["gene", "weight"]
     return top_df
 
 
-def load_lightweight_pattern_matrices() -> tuple[pd.DataFrame, pd.DataFrame]:
-    A = pd.read_csv(PATTERN_GENE_WEIGHTS_TSV_GZ, sep="\t", compression="gzip").set_index("gene")
-    P = pd.read_csv(PATTERN_CELL_ACTIVITIES_TSV_GZ, sep="\t", compression="gzip").set_index("cell_barcode")
+def load_lightweight_pattern_matrices(weights_path: Path, activities_path: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+    A = pd.read_csv(weights_path, sep="\t", compression="gzip").set_index("gene")
+    P = pd.read_csv(activities_path, sep="\t", compression="gzip").set_index("cell_barcode")
     return A, P
 
 
@@ -114,5 +257,116 @@ def build_cogaps_input(preprocessed_cells: ad.AnnData) -> ad.AnnData:
     cogaps_input.obs_names = preprocessed_cells.var_names.copy()
     return cogaps_input
 ```
+
+<details><summary>R alternative: reusable paths and helper functions</summary>
+
+```{r}
+find_project_root_r <- function(start = getwd()) {
+  path <- normalizePath(start, winslash = "/", mustWork = FALSE)
+  repeat {
+    if (file.exists(file.path(path, "index.qmd")) && dir.exists(file.path(path, "data"))) {
+      return(path)
+    }
+    parent <- dirname(path)
+    if (identical(parent, path)) {
+      stop("Could not locate the case-study project root.")
+    }
+    path <- parent
+  }
+}
+
+resolve_first_existing_r <- function(...) {
+  candidates <- c(...)
+  for (candidate in candidates) {
+    if (file.exists(candidate)) {
+      return(candidate)
+    }
+  }
+  candidates[[1]]
+}
+
+ROOT_R <- find_project_root_r()
+PROCESSED_DIR_R <- file.path(ROOT_R, "data", "processed")
+LEGACY_RESULTS_DIR_R <- file.path(ROOT_R, "data", "results")
+PY_RESULTS_DIR_R <- file.path(ROOT_R, "data", "results_python")
+R_RESULTS_DIR_R <- file.path(ROOT_R, "data", "results_r")
+CHOSEN_K_R <- 7L
+CHOSEN_SEED_R <- 2L
+CHOSEN_ITER_R <- 2000L
+STIM_LABEL_R <- "stim"
+
+PREPROCESSED_H5AD_R <- file.path(PROCESSED_DIR_R, "preprocessed_cells_hvg3000.h5ad")
+COGAPS_INPUT_H5AD_R <- file.path(PROCESSED_DIR_R, "cogaps_input_genesxcells_hvg3000_float64.h5ad")
+PREPROCESS_CONFIG_JSON_R <- file.path(PROCESSED_DIR_R, "preprocess_config_hvg3000.json")
+
+PY_CHOSEN_RESULT_H5AD_R <- resolve_first_existing_r(
+  file.path(PY_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.h5ad"),
+  file.path(LEGACY_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.h5ad")
+)
+PY_CHOSEN_METRICS_JSON_R <- resolve_first_existing_r(
+  file.path(PY_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.metrics.json"),
+  file.path(LEGACY_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.metrics.json")
+)
+
+R_CHOSEN_RESULT_RDS_R <- file.path(R_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.rds")
+R_CHOSEN_METRICS_JSON_R <- file.path(R_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.metrics.json")
+R_PATTERN_GENE_WEIGHTS_TSV_GZ_R <- file.path(R_RESULTS_DIR_R, "pattern_gene_weights.tsv.gz")
+R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R <- file.path(R_RESULTS_DIR_R, "pattern_cell_activities.tsv.gz")
+R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ_R <- file.path(R_RESULTS_DIR_R, "pattern_cell_activities_with_metadata.csv.gz")
+R_PATTERN_TOP_GENES_CSV_R <- file.path(R_RESULTS_DIR_R, "pattern_top_genes.csv")
+R_PATTERN_CORRELATIONS_CSV_R <- file.path(R_RESULTS_DIR_R, "pattern_correlations.csv")
+R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV_R <- file.path(R_RESULTS_DIR_R, "pattern_activity_by_celltype_condition.csv")
+R_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV_R <- file.path(R_RESULTS_DIR_R, "pattern_activity_by_replicate_condition.csv")
+R_PATTERN_SUMMARY_CSV_R <- file.path(R_RESULTS_DIR_R, "pattern_summary.csv")
+R_DIRECTION_GLOBAL_CSV_R <- file.path(R_RESULTS_DIR_R, "pattern_gene_directionality_global.csv")
+R_DIRECTION_CELLTYPE_CSV_R <- file.path(R_RESULTS_DIR_R, "pattern_gene_directionality_by_celltype.csv")
+R_DIRECTION_SUMMARY_CSV_R <- file.path(R_RESULTS_DIR_R, "pattern_direction_summary.csv")
+
+HAS_R_CHOSEN_RESULT_R <- file.exists(R_CHOSEN_RESULT_RDS_R)
+HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R <- file.exists(R_PATTERN_GENE_WEIGHTS_TSV_GZ_R) && file.exists(R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R)
+HAS_R_PATTERN_CORRELATIONS_R <- file.exists(R_PATTERN_CORRELATIONS_CSV_R)
+HAS_R_PATTERN_ACTIVITY_BY_CELLTYPE_R <- file.exists(R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV_R)
+HAS_R_PATTERN_SUMMARY_R <- file.exists(R_PATTERN_SUMMARY_CSV_R)
+
+R_ANALYSIS_MODE_R <- if (HAS_R_CHOSEN_RESULT_R) {
+  "full_chosen_result"
+} else if (HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R) {
+  "lightweight_derived"
+} else {
+  "unavailable"
+}
+
+pattern_columns_r <- function(x) {
+  pats <- grep("^Pattern_?[0-9]+$", x, value = TRUE)
+  pats[order(as.integer(sub("^Pattern_?", "", pats)))]
+}
+
+canonicalize_pattern_names_r <- function(x) {
+  sub("^Pattern_?([0-9]+)$", "Pattern\\1", x)
+}
+
+top_genes_from_matrix_r <- function(matrix, pattern, n = 15) {
+  ordered <- sort(matrix[, pattern], decreasing = TRUE)
+  ordered <- head(ordered, n)
+  tibble::tibble(
+    gene = names(ordered),
+    weight = unname(ordered)
+  )
+}
+
+load_lightweight_pattern_matrices_r <- function(weights_path, activities_path) {
+  A <- readr::read_tsv(weights_path, show_col_types = FALSE) |>
+    tibble::column_to_rownames("gene") |>
+    as.data.frame(check.names = FALSE)
+  P <- readr::read_tsv(activities_path, show_col_types = FALSE) |>
+    tibble::column_to_rownames("cell_barcode") |>
+    as.data.frame(check.names = FALSE)
+  colnames(A) <- canonicalize_pattern_names_r(colnames(A))
+  colnames(P) <- canonicalize_pattern_names_r(colnames(P))
+  list(A = A, P = P)
+}
+```
+
+</details>
 
 ***
