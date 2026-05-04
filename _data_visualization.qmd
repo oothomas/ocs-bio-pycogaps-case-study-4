@@ -32,6 +32,31 @@ plt.tight_layout()
 plt.show()
 ```
 
+<details><summary>R alternative: cell types by condition</summary>
+
+```{r}
+celltype_condition_r <- as.data.frame(table(
+  cell_type = colData(sce_cells)$cell_type,
+  condition = colData(sce_cells)$condition
+), stringsAsFactors = FALSE)
+colnames(celltype_condition_r) <- c("cell_type", "condition", "n_cells")
+head(celltype_condition_r)
+```
+
+```{r}
+ggplot(celltype_condition_r, aes(x = cell_type, y = n_cells, fill = condition)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Cells per annotated cell type and condition",
+    x = "Cell type",
+    y = "Number of cells"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+</details>
+
 The conditions are nearly balanced overall and within major cell types. That makes it easier to compare pattern activity between control and stimulated cells, although donor-aware summaries are still important.
 
 ## Preview of the main CoGAPS pattern
@@ -46,6 +71,6 @@ CoGAPS tells us which genes define a pattern. It does not directly tell us wheth
 
 ![](img/pattern_gene_directionality_heatmap.png){fig-alt="Heatmap showing mean paired stim-versus-control log2 fold changes for top CoGAPS pattern genes." width=600 .lightbox}
 
-We will inspect the directionality table directly in the analysis section.
+We will inspect the directionality tables directly in the analysis section for both the Python and R saved results.
 
 ***

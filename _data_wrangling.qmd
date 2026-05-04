@@ -1,7 +1,7 @@
 # **Data Wrangling**
 ***
 
-The processed AnnData object was generated before this case study. The frozen preprocessing steps include filtering genes by minimum cell count, library-size normalization, log transformation, and selection of 3,000 highly variable genes.
+The processed object was generated before this case study. The frozen preprocessing steps include filtering genes by minimum cell count, library-size normalization, log transformation, and selection of 3,000 highly variable genes.
 
 ```{python}
 with open(PREPROCESS_CONFIG_JSON) as f:
@@ -10,9 +10,18 @@ with open(PREPROCESS_CONFIG_JSON) as f:
 preprocess_config
 ```
 
+<details><summary>R alternative: load the preprocessing configuration</summary>
+
+```{r}
+preprocess_config_r <- jsonlite::read_json(PREPROCESS_CONFIG_JSON_R, simplifyVector = TRUE)
+preprocess_config_r
+```
+
+</details>
+
 ## Preparing a CoGAPS input
 
-The AnnData object we loaded is cells x genes. The CoGAPS input used here is genes x cells. That transpose is not just a technical detail: it determines where gene metadata and cell metadata live.
+In Python, the processed `AnnData` object is cells x genes, so we either load a cached genes x cells CoGAPS input or explicitly transpose the matrix.
 
 ```{python}
 if HAS_CACHED_COGAPS_INPUT:
@@ -24,7 +33,7 @@ else:
     print("Expected genes x cells shape:", (adata_cells.n_vars, adata_cells.n_obs))
 ```
 
-The cached input is the default path because rebuilding the dense genes x cells matrix can take time and memory. The code below shows how it was created, but it is not evaluated by default.
+The cached input is the default Python path because rebuilding the dense genes x cells matrix can take time and memory. The code below shows how it was created, but it is not evaluated by default.
 
 ```{python}
 #| eval: false
@@ -43,14 +52,32 @@ else:
     print("Skipping dense input validation because the cached genes x cells file is absent.")
 ```
 
+In R, the `zellkonverter::readH5AD()` import already converts the processed `.h5ad` into a `SingleCellExperiment` with genes in rows and cells in columns. That means the matrix is already in the orientation that `CoGAPS` expects.
+
+<details><summary>R alternative: inspect the matrix that will feed Bioconductor <code>CoGAPS</code></summary>
+
+```{r}
+cogaps_input_r <- assay(sce_cells, "X")
+cat("R CoGAPS input shape (genes x cells):", paste(dim(cogaps_input_r), collapse = " x "), "\n")
+```
+
+```{r}
+#| eval: false
+# If you want an explicit dense matrix object for a local R CoGAPS run:
+cogaps_input_dense_r <- as.matrix(assay(sce_cells, "X"))
+storage.mode(cogaps_input_dense_r) <- "double"
+```
+
+</details>
+
 :::{.think_question}
 ::::{.think_question_header}
 Question opportunity
 ::::
 ::::{.inner_block}
-Why do we need to track the transpose from cells x genes to genes x cells?
+Why do we need to track matrix orientation carefully across Python and R?
 <details><summary>Answer</summary>
-Because the meaning of rows and columns changes. In the cells x genes object, `.obs` describes cells and `.var` describes genes. After transposing for CoGAPS, rows are genes and columns are cells, so metadata must be tracked carefully to avoid interpreting gene weights and cell activities backward.
+Because the meaning of rows and columns changes across data structures. In Python `AnnData`, the processed object is cells x genes, so we transpose to get the genes x cells matrix used by CoGAPS. In R `SingleCellExperiment`, genes already live in rows and cells in columns, so the imported matrix is already aligned to the CoGAPS expectation.
 </details>
 ::::
 :::
