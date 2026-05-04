@@ -1102,15 +1102,15 @@ AAACATACGATGAA-1      ctrl     CD4 T cells patient_1488</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python analysis mode:"</span>, PY_ANALYSIS_MODE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python analysis mode: full_chosen_result</code></pre>
+<pre><code>Python analysis mode: lightweight_derived</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python saved chosen model available:"</span>, HAS_PY_CHOSEN_RESULT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python saved chosen model available: True</code></pre>
+<pre><code>Python saved chosen model available: False</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Cached dense CoGAPS input available:"</span>, HAS_CACHED_COGAPS_INPUT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Cached dense CoGAPS input available: True</code></pre>
+<pre><code>Cached dense CoGAPS input available: False</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python chosen model metrics available:"</span>, PY_CHOSEN_METRICS_JSON.exists())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1132,11 +1132,11 @@ R alternative: inspect saved R artifacts
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R analysis mode:"</span>, R_ANALYSIS_MODE_R, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R analysis mode: full_chosen_result </code></pre>
+<pre><code>R analysis mode: lightweight_derived </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R saved chosen model available:"</span>, HAS_R_CHOSEN_RESULT_R, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R saved chosen model available: TRUE </code></pre>
+<pre><code>R saved chosen model available: FALSE </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R chosen model metrics available:"</span>, <span class="fu">file.exists</span>(R_CHOSEN_METRICS_JSON_R), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1411,12 +1411,8 @@ $created_at
 <span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Cached dense CoGAPS input not available in this render context."</span>)</span>
 <span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Expected genes x cells shape:"</span>, (adata_cells.n_vars, adata_cells.n_obs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>AnnData object with n_obs × n_vars = 3000 × 24673
-    obs: 'name', 'n_cells', 'highly_variable', 'highly_variable_rank', 'means', 'variances', 'variances_norm'
-    var: 'nCount_RNA', 'nFeature_RNA', 'tsne1', 'tsne2', 'label', 'cluster', 'cell_type', 'replicate', 'nCount_SCT', 'nFeature_SCT', 'integrated_snn_res.0.4', 'seurat_clusters', 'condition'
-    uns: 'hvg', 'log1p'
-    varm: 'X_pca', 'X_umap'
-    layers: 'counts'</code></pre>
+<pre><code>Cached dense CoGAPS input not available in this render context.
+Expected genes x cells shape: (3000, 24673)</code></pre>
 </div>
 </div>
 <p>The cached input is the default Python path because rebuilding the dense genes x cells matrix can take time and memory. The code below shows how it was created, but it is not evaluated by default.</p>
@@ -1433,7 +1429,7 @@ $created_at
 <span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
 <span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Skipping dense input validation because the cached genes x cells file is absent."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CoGAPS input shape: (3000, 24673)</code></pre>
+<pre><code>Skipping dense input validation because the cached genes x cells file is absent.</code></pre>
 </div>
 </div>
 <p>In R, the <code>zellkonverter::readH5AD()</code> import already converts the processed <code>.h5ad</code> into a <code>SingleCellExperiment</code> with genes in rows and cells in columns. That means the matrix is already in the orientation that <code>CoGAPS</code> expects.</p>
@@ -1658,7 +1654,7 @@ R alternative: inspect the sweep summary table
 <span id="cb99-21"><a href="#cb99-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb99-22"><a href="#cb99-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python analysis mode:"</span>, analysis_mode_label)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python analysis mode: Full chosen-model H5AD</code></pre>
+<pre><code>Python analysis mode: Lightweight exported A/P matrices</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb101"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Pattern columns:"</span>, pattern_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1746,7 +1742,7 @@ R alternative: load the chosen R result or lightweight R exports
 <span id="cb113-54"><a href="#cb113-54" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb113-55"><a href="#cb113-55" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R analysis mode:"</span>, analysis_mode_label_r, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R analysis mode: Full chosen-model RDS </code></pre>
+<pre><code>R analysis mode: Lightweight exported A/P matrices </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb115"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(pattern_names_r) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
 <span id="cb115-2"><a href="#cb115-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Pattern columns:"</span>, <span class="fu">paste</span>(pattern_names_r, <span class="at">collapse =</span> <span class="st">", "</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
@@ -2621,7 +2617,7 @@ R alternative: directionality across cell types
 </div>
 <div class="sourceCode cell-code" id="cb160"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb160-1"><a href="#cb160-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Platform:"</span>, platform.platform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Platform: Linux-6.12.76-linuxkit-x86_64-with-glibc2.35</code></pre>
+<pre><code>Platform: Linux-6.17.0-1010-azure-x86_64-with-glibc2.35</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb162"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> package_name <span class="kw">in</span> [<span class="st">"anndata"</span>, <span class="st">"pandas"</span>, <span class="st">"numpy"</span>, <span class="st">"scipy"</span>, <span class="st">"matplotlib"</span>]:</span>
 <span id="cb162-2"><a href="#cb162-2" aria-hidden="true" tabindex="-1"></a>    module <span class="op">=</span> <span class="bu">__import__</span>(package_name)</span>
@@ -3108,7 +3104,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"descPosition":"bottom","openEffect":"zoom","closeEffect":"zoom","loop":false,"selector":".lightbox"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","loop":false,"closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
