@@ -15,6 +15,35 @@ data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad
 data/results/cogaps_K7_seed2_iter2000.h5ad
 data/results_python/cogaps_K7_seed2_iter2000.h5ad
 data/results_r/cogaps_K7_seed2_iter2000.rds
+data/results_selected/cogaps_K6_seed2_iter2000.h5ad
+data/results_r_k6_sparse_mt_t4_heavy/cogaps_K6_seed2_iter2000.rds
+data/results_r_k6_sparse_mt_t4_heavy/cogaps_K6_seed2_iter2000.checkpoint.out
+data/results_python_distributed_sparse_on_light_full/*.h5ad
+data/results_python_sparse_instrumented/runs/*.h5ad
+data/results_python_sparse_light_local/runs/*.h5ad
+
+# Local benchmarking, distributed-run, and report-build scratch outputs. Keep
+# selected lightweight K6 artifacts in git, but leave these exploratory bundles
+# local unless we intentionally promote them into the teaching repo.
+data/diagnostics_model_comparison/
+data/results_python_batch_logs/
+data/results_python_distributed*/
+data/results_python_nosparse_instrumented/
+data/results_python_sparse_instrumented/
+data/results_python_sparse_light_local/
+data/results_python_sparse_smoke/
+data/results_r_distributed*/
+data/results_r_nosparse*/
+data/results_r_sparse_instrumented/
+data/results_r/cogaps_K7_seed2_iter2000.diagnostics.json
+data/results_r/cogaps_K7_seed2_iter2000.pattern_uncertainty_summary.csv
+data/results_r/cogaps_K7_seed2_iter2000.snapshot_summary.csv
+data/results_r/cogaps_K7_seed2_iter2000.trace.csv
+
+# Python bytecode and local scratch/render-test folders.
+scripts/__pycache__/
+**/__pycache__/
 
 # Local scratch and render-test folders outside the teaching repo.
 _tmp*
+_render_check*/

@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
 suppressPackageStartupMessages({
+  library(optparse)
   library(zellkonverter)
   library(CoGAPS)
   library(SummarizedExperiment)
@@ -21,9 +22,21 @@ lookup_count <- function(tbl, key) {
 script_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
 script_path <- if (length(script_arg) > 0) sub("^--file=", "", script_arg[[1]]) else "."
 ROOT <- normalizePath(file.path(dirname(script_path), ".."), winslash = "/", mustWork = TRUE)
-PREPROCESSED_H5AD <- file.path(ROOT, "data", "processed", "preprocessed_cells_hvg3000.h5ad")
-CHOSEN_RESULT_RDS <- file.path(ROOT, "data", "results_r", "cogaps_K7_seed2_iter2000.rds")
-OUT_DIR <- file.path(ROOT, "data", "results_r")
+default_preprocessed <- file.path(ROOT, "data", "processed", "preprocessed_cells_hvg3000.h5ad")
+default_result_rds <- file.path(ROOT, "data", "results_r_k6_sparse_mt_t4_heavy", "cogaps_K6_seed2_iter2000.rds")
+default_out_dir <- file.path(ROOT, "data", "results_r_k6_sparse_mt_t4_heavy")
+
+option_list <- list(
+  make_option("--preprocessed-h5ad", type = "character", dest = "preprocessed_h5ad", default = default_preprocessed, help = "Processed cells x genes AnnData (.h5ad) [default %default]"),
+  make_option("--result-rds", type = "character", dest = "result_rds", default = default_result_rds, help = "Saved CoGAPS R result (.rds) [default %default]"),
+  make_option("--outdir", type = "character", default = default_out_dir, help = "Output directory [default %default]")
+)
+
+opt <- parse_args(OptionParser(option_list = option_list))
+
+PREPROCESSED_H5AD <- opt$preprocessed_h5ad
+CHOSEN_RESULT_RDS <- opt$result_rds
+OUT_DIR <- opt$outdir
 
 TOP_N_GENES <- 15
 MIN_CELLS_PER_PSEUDOBULK <- 20

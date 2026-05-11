@@ -49,6 +49,6 @@ The pattern-by-cell matrix. Larger values indicate cells with stronger activity 
 ::::
 :::
 
-In this case study, the most important pattern is Pattern2. It is strongly associated with IFN-beta stimulation and is anchored by canonical interferon-stimulated genes. We will also inspect other patterns, but those interpretations will be more cautious.
+In this case study, the most important signal is the IFN-associated pattern. In the selected R K6 result, that pattern is labeled `Pattern4`; in the secondary Python K6 result, the corresponding signal is labeled `Pattern5`. The label itself is run-specific, so we focus on the pattern's activity, top genes, and directionality rather than treating one pattern number as universal.
 
 ***

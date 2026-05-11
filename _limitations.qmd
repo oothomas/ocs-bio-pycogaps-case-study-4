@@ -4,7 +4,7 @@
 There are some important considerations regarding this data analysis to keep in mind:
 
 1. This case study uses a processed AnnData object with 3,000 highly variable genes rather than a full workflow from raw sequencing files or all measured genes.
-1. The chosen CoGAPS rank, `K = 7`, comes from a limited completed sweep and should be described as a local model-selection decision rather than a universal optimum.
+1. The chosen CoGAPS rank, `K = 6`, comes from a limited completed sweep and should be described as a local model-selection decision rather than a universal optimum.
 1. The main learner workflow loads a saved chosen model by default because running even one CoGAPS model can take substantial time.
 1. CoGAPS pattern weights identify genes associated with latent programs, but up/down regulation must be assessed separately using expression contrasts.
 1. The directionality analysis is targeted to top pattern genes and is not a genome-wide differential-expression analysis.

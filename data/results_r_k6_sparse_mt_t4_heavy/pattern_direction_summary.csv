@@ -1,0 +1,7 @@
+"pattern","n_top_genes","n_up_in_stim","n_down_in_stim","n_mixed_or_unclear","n_strong","n_moderate","n_suggestive","n_weak_or_mixed","median_mean_log2fc","top_up_genes","top_down_genes"
+"Pattern1",15,6,9,0,11,2,1,1,-0.280272296492361,"SAT1, CTSS, MS4A7, CST3, SOD2","ACTB, TIMP1, FTH1, CXCL16, PSAP"
+"Pattern2",15,2,13,0,9,3,1,2,-0.593321764978219,"TYROBP, C15orf48","ACTB, GAPDH, PFN1, TIMP1, FTH1"
+"Pattern3",15,2,6,0,6,1,1,0,NA,"HSP90AA1, HSP90AB1, NA, NA, NA","ACTB, PFN1, FTH1, ACTG1, FTL"
+"Pattern4",15,14,1,0,15,0,0,0,4.18328625296589,"IFIT1, IFIT3, IFIT2, ISG15, TNFSF10","FTH1"
+"Pattern5",15,13,2,0,14,0,0,1,4.18328625296589,"CXCL10, RSAD2, IFIT3, ISG15, APOBEC3A","FTH1, FTL"
+"Pattern6",15,4,11,0,9,4,2,0,-0.902898406678067,"CCR7, ANXA1, HSPA8, CREM","RGCC, ACTB, GAPDH, PFN1, FTH1"

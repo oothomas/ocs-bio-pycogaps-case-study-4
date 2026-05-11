@@ -28,12 +28,12 @@ The draft data files included with this first-pass project are cached analysis o
 | --- | --- |
 | `data/processed/preprocessed_cells_hvg3000.h5ad` | Processed cells x genes AnnData object |
 | `data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad` | Optional cached genes x cells CoGAPS input |
-| `data/results/cogaps_K7_seed2_iter2000.h5ad` | Saved chosen CoGAPS model |
-| `data/results/pattern_gene_weights.tsv.gz` | Lightweight exported gene-weight matrix for render-safe fallbacks |
-| `data/results/pattern_cell_activities.tsv.gz` | Lightweight exported cell-activity matrix for render-safe fallbacks |
-| `data/results/pattern_gene_directionality_global.csv` | Targeted directionality results for top pattern genes |
+| `data/results_r_k6_sparse_mt_t4_heavy/cogaps_K6_seed2_iter2000.metrics.json` | Selected R K6 model metadata |
+| `data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_weights.tsv.gz` | Lightweight exported R gene-weight matrix for render-safe fallbacks |
+| `data/results_r_k6_sparse_mt_t4_heavy/pattern_cell_activities.tsv.gz` | Lightweight exported R cell-activity matrix for render-safe fallbacks |
+| `data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_directionality_global.csv` | Targeted R directionality results for top pattern genes |
 
-The main case-study workflow does not require a cluster. Learners can complete the case study by loading the saved chosen model. If the large chosen-model file is not available, most interpretation steps can still be completed from the lightweight exported pattern tables. Running one local CoGAPS model is included as an optional exercise and may take substantial time depending on the learner's computer.
+The main case-study workflow does not require a cluster. Learners can complete the case study by loading the lightweight selected R K6 pattern tables. If the full R `.rds` or Python `.h5ad` model files are available locally, the same workflow can load those larger files; otherwise the render-safe pattern tables are sufficient for the main interpretation. Running one local CoGAPS model is included as an optional exercise and may take substantial time depending on the learner's computer.
 
 The full SLURM sweep used to justify the chosen `K` is documented as optional instructor or advanced-user material in the Additional Information section.
 

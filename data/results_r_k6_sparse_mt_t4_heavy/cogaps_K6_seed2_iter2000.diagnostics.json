@@ -1,0 +1,56 @@
+{
+  "status": "ok",
+  "language": "R",
+  "package": "CoGAPS",
+  "package_version": "3.22.0",
+  "result_rds": "cogaps_K6_seed2_iter2000.rds",
+  "dimensions": {
+    "genes": 3000,
+    "samples": 24673,
+    "patterns": 6
+  },
+  "params": {
+    "nPatterns": 6,
+    "nIterations": 2000,
+    "alphaA": 0.01,
+    "alphaP": 0.01,
+    "maxGibbsMassA": 100,
+    "maxGibbsMassP": 100,
+    "seed": 2,
+    "sparseOptimization": true,
+    "nSets": 4,
+    "cut": 7,
+    "minNS": 2,
+    "maxNS": 6,
+    "subsetDim": 0,
+    "checkpointInterval": 0,
+    "whichMatrixFixed": "N",
+    "takePumpSamples": true
+  },
+  "metadata_summary": {
+    "meanChiSq": 221295424,
+    "totalUpdates": 391021127,
+    "totalRunningTime": 937,
+    "averageQueueLengthA": 43.4163,
+    "averageQueueLengthP": 151.9422,
+    "chisq_points": 40,
+    "atomsA_points": 40,
+    "atomsP_points": 40,
+    "equilibrationSnapshots": 10,
+    "samplingSnapshots": 10,
+    "pumpStatDim": [3000, 6],
+    "meanPatternAssignmentDim": [3000, 6]
+  },
+  "trace_summary": {
+    "chisq_start": 253439072,
+    "chisq_end": 222432704,
+    "chisq_min": 222414208,
+    "chisq_max": 253439072,
+    "chisq_num_increases": 11,
+    "chisq_num_decreases": 28,
+    "atomsA_start": 3094,
+    "atomsA_end": 8352,
+    "atomsP_start": 39452,
+    "atomsP_end": 95992
+  }
+}

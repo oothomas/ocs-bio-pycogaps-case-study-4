@@ -32,168 +32,38 @@ Notes
 
 from __future__ import annotations
 
-import os
 import sys
 import json
 import time
 import argparse
-import logging
 import traceback
+import warnings
+import os
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-import numpy as np
-import scanpy as sc
+warnings.filterwarnings("ignore", category=FutureWarning, module=r"anndata(\.|$)")
+warnings.filterwarnings("ignore", message=r"Importing .* from `anndata` is deprecated.*", category=FutureWarning)
+
+import anndata as ad
 
 from PyCoGAPS.parameters import CoParams, setParams
 from PyCoGAPS.pycogaps_main import CoGAPS
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 
-
-def now_stamp() -> str:
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
-
-
-def setup_logger(log_path: Path) -> logging.Logger:
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    logger = logging.getLogger(f"run_one_{now_stamp()}")
-    logger.setLevel(logging.INFO)
-    logger.handlers.clear()
-
-    fh = logging.FileHandler(log_path, encoding="utf-8")
-    fh.setLevel(logging.INFO)
-
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.INFO)
-
-    fmt = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
-    fh.setFormatter(fmt)
-    ch.setFormatter(fmt)
-
-    logger.addHandler(fh)
-    logger.addHandler(ch)
-    return logger
-
-
-def set_blas_threads(n: int) -> None:
-    n = str(int(n))
-    os.environ["OMP_NUM_THREADS"] = n
-    os.environ["OPENBLAS_NUM_THREADS"] = n
-    os.environ["MKL_NUM_THREADS"] = n
-    os.environ["NUMEXPR_NUM_THREADS"] = n
-    os.environ["VECLIB_MAXIMUM_THREADS"] = n  # macOS Accelerate
-
-
-def atomic_write_h5ad(adata: sc.AnnData, out_path: Path) -> None:
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
-    if tmp_path.exists():
-        tmp_path.unlink()
-    adata.write_h5ad(tmp_path)
-    if tmp_path.stat().st_size == 0:
-        raise RuntimeError(f"Atomic write failed: temp file is 0 bytes: {tmp_path}")
-    tmp_path.replace(out_path)
-
-
-def find_preprocessed_cells(outdir: Path) -> Optional[Path]:
-    """
-    Best-effort: locate outdir/cache/preprocessed_cells_*.h5ad.
-    If multiple exist, prefer one containing 'hvg3000' in the name.
-    """
-    cache = outdir / "cache"
-    if not cache.exists():
-        return None
-    candidates = sorted(cache.glob("preprocessed_cells_*.h5ad"))
-    if not candidates:
-        return None
-    # prefer common naming
-    for p in candidates:
-        if "hvg3000" in p.name:
-            return p
-    return candidates[0]
-
-
-def ensure_condition_column(adata_cells: sc.AnnData) -> None:
-    if "condition" not in adata_cells.obs:
-        if "label" in adata_cells.obs:
-            adata_cells.obs["condition"] = adata_cells.obs["label"]
-        elif "stim" in adata_cells.obs:
-            adata_cells.obs["condition"] = adata_cells.obs["stim"]
-    if "condition" not in adata_cells.obs:
-        raise ValueError("Could not find/create 'condition' in preprocessed cells .obs")
-
-
-def compute_ifn_pattern(
-    result: sc.AnnData,
-    cogaps_input: sc.AnnData,
-    *,
-    outdir: Path,
-    top_n: int,
-    stim_label: str = "stim",
-) -> Tuple[str, float, List[str]]:
-    """
-    Identify IFN-associated pattern = pattern whose per-cell activity most correlates with stim.
-
-    - CoGAPS result.var: pattern activities per cell (cells are variables)
-    - Condition vector:
-        1) try cogaps_input.var['condition'] (cells are vars in cogaps_input)
-        2) else load preprocessed cells from outdir/cache and align by cell IDs
-    - Gene loadings come from result.obs (genes are obs)
-    """
-    # Pattern columns (robust ordering Pattern1..K)
-    pats = [c for c in result.var.columns if str(c).lower().startswith("pattern")]
-    pats = sorted(pats, key=lambda s: int(str(s).replace("Pattern", "")) if str(s).replace("Pattern", "").isdigit() else 10**9)
-    if not pats:
-        raise ValueError("No Pattern* columns found in result.var")
-
-    # Build condition vector aligned to result.var_names (cells)
-    cells = result.var_names.astype(str)
-
-    cond_series = None
-    if "condition" in cogaps_input.var.columns:
-        # Align using cell IDs
-        if cogaps_input.var_names.astype(str).equals(cells):
-            cond_series = cogaps_input.var["condition"]
-        else:
-            # reindex by cell name
-            cond_series = cogaps_input.var.reindex(cells)["condition"]
-    else:
-        # Fallback: load preprocessed cells file
-        pre_path = find_preprocessed_cells(outdir)
-        if pre_path is None:
-            raise ValueError(
-                "cogaps_input.var missing 'condition' and could not find preprocessed_cells_*.h5ad in outdir/cache"
-            )
-        ad_cells = sc.read_h5ad(str(pre_path))
-        ensure_condition_column(ad_cells)
-        # align to cell IDs
-        cond_series = ad_cells.obs.reindex(cells)["condition"]
-
-    if cond_series is None or cond_series.isna().any():
-        raise ValueError("Could not align condition labels to CoGAPS result cells (NaNs after reindex).")
-
-    cond = (cond_series.astype(str) == stim_label).astype(int)
-
-    # Correlation per pattern
-    P = result.var[pats]
-    corrs = {pat: float(P[pat].corr(cond)) for pat in pats}
-    ifn_pattern = max(corrs, key=lambda k: corrs[k])
-    ifn_corr = corrs[ifn_pattern]
-
-    # Top genes from result.obs
-    pats_obs = [c for c in result.obs.columns if str(c).lower().startswith("pattern")]
-    pats_obs = sorted(pats_obs, key=lambda s: int(str(s).replace("Pattern", "")) if str(s).replace("Pattern", "").isdigit() else 10**9)
-    if ifn_pattern not in pats_obs:
-        raise ValueError(f"Expected {ifn_pattern} in result.obs Pattern columns; found {pats_obs[:5]}...")
-
-    top_genes = (
-        result.obs[ifn_pattern]
-        .sort_values(ascending=False)
-        .head(top_n)
-        .index.astype(str)
-        .tolist()
-    )
-    return ifn_pattern, ifn_corr, top_genes
+from cogaps_python_utils import (  # noqa: E402
+    atomic_write_h5ad,
+    atomic_write_json,
+    compute_ifn_pattern,
+    setup_logger,
+    set_blas_threads,
+    summarize_result_uns,
+    top_genes_table,
+    trace_dataframe,
+)
 
 
 def main() -> None:
@@ -209,6 +79,15 @@ def main() -> None:
     ap.add_argument("--cogaps-threads", type=int, default=1, help="Threads passed to CoGAPS(nThreads=...)")
     ap.add_argument("--use-sparse-opt", action="store_true", help="Use sparseOptimization / useSparseOptimization")
     ap.add_argument("--no-sparse-opt", action="store_true", help="Disable sparse optimization")
+    ap.add_argument("--output-frequency", type=int, default=1000, help="How often CoGAPS prints trace updates")
+    ap.add_argument("--checkpoint-interval", type=int, default=0, help="Checkpoint interval (0 disables checkpoints)")
+    ap.add_argument("--checkpoint-out-file", type=str, default="", help="Optional checkpoint output file")
+    ap.add_argument("--checkpoint-in-file", type=str, default="", help="Optional checkpoint input file")
+    ap.add_argument("--n-snapshots", type=int, default=0, help="Snapshots per phase (0 disables snapshots)")
+    ap.add_argument("--snapshot-phase", type=str, default="sampling", choices=["sampling", "equilibration", "all"], help="Which phase(s) to snapshot")
+    ap.add_argument("--take-pump-samples", action="store_true", help="Enable pump statistics collection")
+    ap.add_argument("--asynchronous-updates", action="store_true", help="Request asynchronous updates when CoGAPS threads > 1")
+    ap.add_argument("--preprocessed-h5ad", type=str, default="", help="Optional processed cells x genes H5AD for condition alignment fallback")
     ap.add_argument("--force-rerun", action="store_true", help="Re-run even if metrics exist and status==ok")
     args = ap.parse_args()
 
@@ -226,6 +105,9 @@ def main() -> None:
 
     result_path = runs_dir / f"cogaps_{tag}.h5ad"
     metrics_path = runs_dir / f"cogaps_{tag}.metrics.json"
+    diagnostics_path = runs_dir / f"cogaps_{tag}.diagnostics.json"
+    trace_path = runs_dir / f"cogaps_{tag}.trace.csv"
+    top_genes_path = runs_dir / f"cogaps_{tag}.pattern_top_genes.csv"
 
     # Cache skip ONLY if status==ok
     if result_path.exists() and metrics_path.exists() and (not args.force_rerun):
@@ -249,9 +131,10 @@ def main() -> None:
     ifn_pattern = None
     ifn_corr = None
     top_genes = None
+    preprocessed_h5ad = Path(args.preprocessed_h5ad) if args.preprocessed_h5ad else None
 
     try:
-        cogaps_input = sc.read_h5ad(args.cogaps_input_h5ad)
+        cogaps_input = ad.read_h5ad(args.cogaps_input_h5ad)
 
         params = CoParams(adata=cogaps_input)
 
@@ -269,11 +152,35 @@ def main() -> None:
                 "nIterations": int(args.n_iter),
                 "seed": int(args.seed),
                 "useSparseOptimization": bool(sparse_opt),
+                "takePumpSamples": bool(args.take_pump_samples),
             },
         )
 
-        logger.info(f"[RUN] Starting {tag} | sparse_opt={sparse_opt} | blas_threads={args.blas_threads} | cogaps_threads={args.cogaps_threads}")
-        result = CoGAPS(cogaps_input, params, nThreads=int(args.cogaps_threads))
+        logger.info(
+            "[RUN] Starting %s | sparse_opt=%s | blas_threads=%s | cogaps_threads=%s | "
+            "output_frequency=%s | checkpoint_interval=%s | n_snapshots=%s | snapshot_phase=%s | pump=%s",
+            tag,
+            sparse_opt,
+            args.blas_threads,
+            args.cogaps_threads,
+            args.output_frequency,
+            args.checkpoint_interval,
+            args.n_snapshots,
+            args.snapshot_phase,
+            args.take_pump_samples,
+        )
+        result = CoGAPS(
+            cogaps_input,
+            params,
+            nThreads=int(args.cogaps_threads),
+            outputFrequency=int(args.output_frequency),
+            checkpointOutFile=args.checkpoint_out_file,
+            checkpointInterval=int(args.checkpoint_interval),
+            checkpointInFile=args.checkpoint_in_file,
+            asynchronousUpdates=(True if args.asynchronous_updates else None),
+            nSnapshots=int(args.n_snapshots),
+            snapshotPhase=args.snapshot_phase,
+        )
 
         logger.info(f"[INFO] Writing result: {result_path}")
         atomic_write_h5ad(result, result_path)
@@ -281,6 +188,7 @@ def main() -> None:
         ifn_pattern, ifn_corr, top_genes = compute_ifn_pattern(
             result=result,
             cogaps_input=cogaps_input,
+            preprocessed_cells_h5ad=preprocessed_h5ad,
             outdir=outdir,
             top_n=int(args.top_genes),
             stim_label=args.stim_label,
@@ -294,11 +202,21 @@ def main() -> None:
         logger.error("[ERROR] Run failed:\n" + err_txt)
 
     runtime = time.time() - t0
+    diagnostics: Dict[str, Any] = {}
     payload = {
         "K": int(args.k),
         "seed": int(args.seed),
         "n_iter": int(args.n_iter),
         "status": status,
+        "language": "Python",
+        "package": "PyCoGAPS",
+        "sparseOptimization": bool(False if args.no_sparse_opt else True),
+        "outputFrequency": int(args.output_frequency),
+        "checkpointInterval": int(args.checkpoint_interval),
+        "nSnapshots": int(args.n_snapshots),
+        "snapshotPhase": args.snapshot_phase,
+        "takePumpSamples": bool(args.take_pump_samples),
+        "asynchronousUpdates": bool(args.asynchronous_updates),
         "runtime_sec": float(runtime),
         "result_path": str(result_path),
         "metrics_path": str(metrics_path),
@@ -308,11 +226,19 @@ def main() -> None:
         "error": err_txt,
         "timestamp": datetime.now().isoformat(timespec="seconds"),
     }
-    tmp = metrics_path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    tmp.replace(metrics_path)
+    if status == "ok" and result_path.exists():
+        result_saved = ad.read_h5ad(result_path)
+        diagnostics = summarize_result_uns(result_saved)
+        atomic_write_json(diagnostics, diagnostics_path)
+        trace_dataframe(result_saved).to_csv(trace_path, index=False)
+        top_genes_table(result_saved, n_top=int(args.top_genes)).to_csv(top_genes_path, index=False)
+        payload.update(diagnostics)
+
+    atomic_write_json(payload, metrics_path)
 
     logger.info(f"[DONE] {tag} | {status.upper()} | {runtime/60:.2f} min | metrics: {metrics_path}")
+    if status != "ok":
+        sys.exit(1)
 
 
 if __name__ == "__main__":

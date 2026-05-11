@@ -3,19 +3,23 @@
 
 We will start from a cached processed single-cell object. This keeps the focus of the case study on latent-variable analysis and interpretation rather than on rebuilding every preprocessing step from the original source files.
 
-```{python}
-adata_cells = ad.read_h5ad(PREPROCESSED_H5AD)
-adata_cells
-```
+::: {.panel-tabset}
 
-<details><summary>R alternative: load the processed object with <code>zellkonverter</code></summary>
+### R
 
 ```{r}
 sce_cells <- zellkonverter::readH5AD(PREPROCESSED_H5AD_R, reader = "R")
 sce_cells
 ```
 
-</details>
+### Python
+
+```{python}
+adata_cells = ad.read_h5ad(PREPROCESSED_H5AD)
+adata_cells
+```
+
+:::
 
 We need three metadata columns for the rest of the case study:
 
@@ -23,17 +27,9 @@ We need three metadata columns for the rest of the case study:
 1. `cell_type`, so we can summarize patterns across immune compartments
 1. `replicate`, so we can perform paired donor-aware summaries
 
-```{python}
-required_obs = {"condition", "cell_type", "replicate"}
-missing_obs = required_obs.difference(adata_cells.obs.columns)
+::: {.panel-tabset}
 
-if missing_obs:
-    raise ValueError(f"Missing required metadata columns: {sorted(missing_obs)}")
-
-adata_cells.obs[["condition", "cell_type", "replicate"]].head()
-```
-
-<details><summary>R alternative: verify required metadata columns</summary>
+### R
 
 ```{r}
 required_obs_r <- c("condition", "cell_type", "replicate")
@@ -47,31 +43,45 @@ as.data.frame(colData(sce_cells)[, required_obs_r]) |>
   head()
 ```
 
-</details>
+### Python
 
-The default path in this case study uses a saved chosen CoGAPS model. We check which saved artifacts are available now and interpret them later.
+```{python}
+required_obs = {"condition", "cell_type", "replicate"}
+missing_obs = required_obs.difference(adata_cells.obs.columns)
+
+if missing_obs:
+    raise ValueError(f"Missing required metadata columns: {sorted(missing_obs)}")
+
+adata_cells.obs[["condition", "cell_type", "replicate"]].head()
+```
+
+:::
+
+The default path in this case study uses saved R-primary CoGAPS artifacts. If the full R result is available, the case study can load it directly; otherwise it uses lightweight exported matrices and summaries that are suitable for GitHub and classroom rendering. The Python implementation follows the same cooking-show pattern in the secondary tab: full `.h5ad` support is preserved for local review, but lightweight Python exports are sufficient when that larger file is absent.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+cat("R analysis mode:", R_ANALYSIS_MODE_R, "\n")
+cat("R full chosen model available:", HAS_R_CHOSEN_RESULT_R, "\n")
+cat("R chosen model metrics available:", file.exists(R_CHOSEN_METRICS_JSON_R), "\n")
+cat("R lightweight pattern matrices available:", HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R, "\n")
+cat("R lightweight pattern summary available:", HAS_R_PATTERN_SUMMARY_R, "\n")
+```
+
+### Python
 
 ```{python}
 print("Python analysis mode:", PY_ANALYSIS_MODE)
-print("Python saved chosen model available:", HAS_PY_CHOSEN_RESULT)
+print("Python full chosen model available:", HAS_PY_CHOSEN_RESULT)
 print("Cached dense CoGAPS input available:", HAS_CACHED_COGAPS_INPUT)
 print("Python chosen model metrics available:", PY_CHOSEN_METRICS_JSON.exists())
 print("Python lightweight pattern matrices available:", HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES)
 print("Python lightweight pattern summary available:", HAS_PY_PATTERN_SUMMARY)
 ```
 
-<details><summary>R alternative: inspect saved R artifacts</summary>
-
-```{r}
-cat("R analysis mode:", R_ANALYSIS_MODE_R, "\n")
-cat("R saved chosen model available:", HAS_R_CHOSEN_RESULT_R, "\n")
-cat("R chosen model metrics available:", file.exists(R_CHOSEN_METRICS_JSON_R), "\n")
-cat("R lightweight pattern matrices available:", HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R, "\n")
-cat("R lightweight pattern summary available:", HAS_R_PATTERN_SUMMARY_R, "\n")
-```
-
-</details>
-
-If the full chosen-model file is unavailable, the case study falls back to lightweight exported pattern matrices and summary tables. That fallback is intended to keep GitHub and classroom renders informative without requiring the large saved model objects.
+:::
 
 ***

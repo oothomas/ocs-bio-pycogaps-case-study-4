@@ -27,16 +27,16 @@
 - `matplotlib`
 - `PyCoGAPS`
 
-## Optional HPC Appendix: How `K = 7` Was Selected
+## Optional HPC Appendix: How `K = 6` Was Selected
 ***
 
 This section is for instructors and advanced users. Learners do not need to run the sweep to complete the case study.
 
-The main analysis uses a saved `K = 7` CoGAPS result. The choice of `K = 7` was supported by a limited sweep over multiple ranks, seeds, and iteration counts. The sweep evaluated IFN-pattern correlation and top-gene overlap stability, then selected the smallest stable `K` under the local selection rule.
+The main analysis uses a saved `K = 6` CoGAPS result. K6 was selected after an initial K7-centered sweep, a lower-K extension, longer-iteration checks, and a candidate pattern-structure comparison. The sweep evaluated IFN-pattern correlation, top-gene overlap stability, runtime, and whether lower-rank models preserved biologically useful non-IFN structure.
 
 The final teaching workflow uses:
 
-- `K = 7`
+- `K = 6`
 - `seed = 2`
 - `n_iter = 2000`
 - one non-distributed chosen-model result
@@ -44,11 +44,11 @@ The final teaching workflow uses:
 ## Sweep summary
 
 ```{python}
-summary_by_k = pd.read_csv(SUMMARY_BY_K_CSV)
+summary_by_k = pd.read_csv(PHASE1B_LOWERK_LONG_SUMMARY_CSV)
 summary_by_k.sort_values(["K", "n_iter"])
 ```
 
-For `K = 7`, `n_iter = 2000`, the available sweep summary has strong IFN-correlation stability and high top-gene overlap. The selected setting should be described as the best choice under this local sweep rule, not as a universal optimum.
+For `K = 6`, `n_iter = 2000`, the available sweep summary has strong IFN-correlation stability, perfect top-gene overlap across seeds in the lower-K screen, and better preservation of non-IFN structure than K4 or K5. The selected setting should be described as the best choice under this local case-study rule, not as a universal optimum.
 
 ## Optional command-line workflow
 
@@ -72,16 +72,16 @@ This is cluster-specific workflow provenance. It is not intended to be a turnkey
 
 ## Figures for model-selection context
 
-![](img/jaccard_ifn_topgenes_K7_iter2000.png){fig-alt="Top-gene Jaccard overlap heatmap for IFN-associated patterns across K equals 7, n_iter equals 2000 sweep runs." width=700 .lightbox}
+The older K7 Jaccard figure is retained only as historical/reference context. The selected-model decision is now based on the lower-K and candidate-structure follow-up analyses.
 
 ## Directionality analysis provenance
 
 The directionality analysis used in the main case study was generated with:
 
-- `scripts/pattern_directionality_analysis.py`
-- `data/results/pattern_gene_directionality_global.csv`
-- `data/results/pattern_gene_directionality_by_celltype.csv`
-- `data/results/pattern_direction_summary.csv`
+- `scripts/pattern_directionality_analysis_r.R`
+- `data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_directionality_global.csv`
+- `data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_directionality_by_celltype.csv`
+- `data/results_r_k6_sparse_mt_t4_heavy/pattern_direction_summary.csv`
 
 It is a targeted analysis of top CoGAPS pattern genes, not a genome-wide differential-expression analysis.
 

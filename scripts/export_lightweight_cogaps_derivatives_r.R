@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
 suppressPackageStartupMessages({
+  library(optparse)
   library(jsonlite)
   library(zellkonverter)
   library(CoGAPS)
@@ -13,10 +14,24 @@ suppressPackageStartupMessages({
 script_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
 script_path <- if (length(script_arg) > 0) sub("^--file=", "", script_arg[[1]]) else "."
 ROOT <- normalizePath(file.path(dirname(script_path), ".."), winslash = "/", mustWork = TRUE)
-PREPROCESSED_H5AD <- file.path(ROOT, "data", "processed", "preprocessed_cells_hvg3000.h5ad")
-CHOSEN_RESULT_RDS <- file.path(ROOT, "data", "results_r", "cogaps_K7_seed2_iter2000.rds")
-OUT_DIR <- file.path(ROOT, "data", "results_r")
-STIM_LABEL <- "stim"
+default_preprocessed <- file.path(ROOT, "data", "processed", "preprocessed_cells_hvg3000.h5ad")
+default_result_rds <- file.path(ROOT, "data", "results_r_k6_sparse_mt_t4_heavy", "cogaps_K6_seed2_iter2000.rds")
+default_out_dir <- file.path(ROOT, "data", "results_r_k6_sparse_mt_t4_heavy")
+
+option_list <- list(
+  make_option("--preprocessed-h5ad", type = "character", dest = "preprocessed_h5ad", default = default_preprocessed, help = "Processed cells x genes AnnData (.h5ad) [default %default]"),
+  make_option("--result-rds", type = "character", dest = "result_rds", default = default_result_rds, help = "Saved CoGAPS R result (.rds) [default %default]"),
+  make_option("--outdir", type = "character", default = default_out_dir, help = "Output directory [default %default]"),
+  make_option("--stim-label", type = "character", dest = "stim_label", default = "stim", help = "Stimulated condition label [default %default]"),
+  make_option("--top-genes", type = "integer", dest = "top_genes", default = 50, help = "Top genes retained per pattern [default %default]")
+)
+
+opt <- parse_args(OptionParser(option_list = option_list))
+
+PREPROCESSED_H5AD <- opt$preprocessed_h5ad
+CHOSEN_RESULT_RDS <- opt$result_rds
+OUT_DIR <- opt$outdir
+STIM_LABEL <- opt$stim_label
 
 pattern_columns <- function(x) {
   pats <- grep("^Pattern_?[0-9]+$", x, value = TRUE)
@@ -56,6 +71,12 @@ write_gz_tsv <- function(df, path) {
   con <- gzfile(path, open = "wt")
   on.exit(close(con), add = TRUE)
   write.table(df, con, sep = "\t", quote = FALSE, row.names = FALSE)
+}
+
+write_gz_csv <- function(df, path) {
+  con <- gzfile(path, open = "wt")
+  on.exit(close(con), add = TRUE)
+  write.csv(df, con, row.names = FALSE)
 }
 
 coerce_aggregate_stats <- function(x) {
@@ -119,7 +140,7 @@ pattern_corrs <- data.frame(
 )
 pattern_corrs <- pattern_corrs[order(pattern_corrs$corr_with_stim, decreasing = TRUE), ]
 
-top_genes <- do.call(rbind, lapply(pattern_names, function(pattern) top_genes_from_matrix(A, pattern, n = 50)))
+top_genes <- do.call(rbind, lapply(pattern_names, function(pattern) top_genes_from_matrix(A, pattern, n = opt$top_genes)))
 
 activity_by_celltype_condition <- do.call(
   rbind,
@@ -192,10 +213,23 @@ pattern_summary <- do.call(
 
 A_df <- data.frame(gene = rownames(A), A, row.names = NULL, check.names = FALSE)
 P_df_out <- data.frame(cell_barcode = rownames(P), P, row.names = NULL, check.names = FALSE)
+A_sd <- as.matrix(slot(result, "loadingStdDev"))
+P_sd <- as.matrix(slot(result, "factorStdDev"))
+
+A_sd <- ensure_pattern_matrix_orientation(A_sd, nrow(sce), rownames(sce))
+P_sd <- ensure_pattern_matrix_orientation(P_sd, ncol(sce), colnames(sce))
+
+colnames(A_sd) <- colnames(A)
+colnames(P_sd) <- colnames(P)
+
+A_sd_df <- data.frame(gene = rownames(A_sd), A_sd, row.names = NULL, check.names = FALSE)
+P_sd_df <- data.frame(cell_barcode = rownames(P_sd), P_sd, row.names = NULL, check.names = FALSE)
 
 write_gz_tsv(A_df, file.path(OUT_DIR, "pattern_gene_weights.tsv.gz"))
 write_gz_tsv(P_df_out, file.path(OUT_DIR, "pattern_cell_activities.tsv.gz"))
-write.csv(cell_activities_with_metadata, file = gzfile(file.path(OUT_DIR, "pattern_cell_activities_with_metadata.csv.gz"), "wt"), row.names = FALSE)
+write_gz_tsv(A_sd_df, file.path(OUT_DIR, "pattern_gene_weight_sd.tsv.gz"))
+write_gz_tsv(P_sd_df, file.path(OUT_DIR, "pattern_cell_activity_sd.tsv.gz"))
+write_gz_csv(cell_activities_with_metadata, file.path(OUT_DIR, "pattern_cell_activities_with_metadata.csv.gz"))
 write.csv(top_genes, file.path(OUT_DIR, "pattern_top_genes.csv"), row.names = FALSE)
 write.csv(pattern_corrs, file.path(OUT_DIR, "pattern_correlations.csv"), row.names = FALSE)
 write.csv(activity_by_celltype_condition, file.path(OUT_DIR, "pattern_activity_by_celltype_condition.csv"), row.names = FALSE)

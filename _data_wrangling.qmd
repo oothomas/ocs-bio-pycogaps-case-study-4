@@ -3,6 +3,17 @@
 
 The processed object was generated before this case study. The frozen preprocessing steps include filtering genes by minimum cell count, library-size normalization, log transformation, and selection of 3,000 highly variable genes.
 
+::: {.panel-tabset}
+
+### R
+
+```{r}
+preprocess_config_r <- jsonlite::read_json(PREPROCESS_CONFIG_JSON_R, simplifyVector = TRUE)
+preprocess_config_r
+```
+
+### Python
+
 ```{python}
 with open(PREPROCESS_CONFIG_JSON) as f:
     preprocess_config = json.load(f)
@@ -10,18 +21,29 @@ with open(PREPROCESS_CONFIG_JSON) as f:
 preprocess_config
 ```
 
-<details><summary>R alternative: load the preprocessing configuration</summary>
-
-```{r}
-preprocess_config_r <- jsonlite::read_json(PREPROCESS_CONFIG_JSON_R, simplifyVector = TRUE)
-preprocess_config_r
-```
-
-</details>
+:::
 
 ## Preparing a CoGAPS input
 
-In Python, the processed `AnnData` object is cells x genes, so we either load a cached genes x cells CoGAPS input or explicitly transpose the matrix.
+In the primary R workflow, `zellkonverter::readH5AD()` imports the processed `.h5ad` into a `SingleCellExperiment` with genes in rows and cells in columns. That means the matrix is already in the orientation expected by Bioconductor `CoGAPS`.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+cogaps_input_r <- assay(sce_cells, "X")
+cat("R CoGAPS input shape (genes x cells):", paste(dim(cogaps_input_r), collapse = " x "), "\n")
+```
+
+```{r}
+#| eval: false
+# If you want an explicit dense matrix object for a full local R CoGAPS run:
+cogaps_input_dense_r <- as.matrix(assay(sce_cells, "X"))
+storage.mode(cogaps_input_dense_r) <- "double"
+```
+
+### Python
 
 ```{python}
 if HAS_CACHED_COGAPS_INPUT:
@@ -33,15 +55,11 @@ else:
     print("Expected genes x cells shape:", (adata_cells.n_vars, adata_cells.n_obs))
 ```
 
-The cached input is the default Python path because rebuilding the dense genes x cells matrix can take time and memory. The code below shows how it was created, but it is not evaluated by default.
-
 ```{python}
 #| eval: false
 cogaps_input_from_cells = build_cogaps_input(adata_cells)
 cogaps_input_from_cells.write_h5ad(COGAPS_INPUT_H5AD)
 ```
-
-The CoGAPS input should have one row per gene and one column per cell.
 
 ```{python}
 if cogaps_input is not None:
@@ -52,23 +70,7 @@ else:
     print("Skipping dense input validation because the cached genes x cells file is absent.")
 ```
 
-In R, the `zellkonverter::readH5AD()` import already converts the processed `.h5ad` into a `SingleCellExperiment` with genes in rows and cells in columns. That means the matrix is already in the orientation that `CoGAPS` expects.
-
-<details><summary>R alternative: inspect the matrix that will feed Bioconductor <code>CoGAPS</code></summary>
-
-```{r}
-cogaps_input_r <- assay(sce_cells, "X")
-cat("R CoGAPS input shape (genes x cells):", paste(dim(cogaps_input_r), collapse = " x "), "\n")
-```
-
-```{r}
-#| eval: false
-# If you want an explicit dense matrix object for a local R CoGAPS run:
-cogaps_input_dense_r <- as.matrix(assay(sce_cells, "X"))
-storage.mode(cogaps_input_dense_r) <- "double"
-```
-
-</details>
+:::
 
 :::{.think_question}
 ::::{.think_question_header}
@@ -77,7 +79,7 @@ Question opportunity
 ::::{.inner_block}
 Why do we need to track matrix orientation carefully across Python and R?
 <details><summary>Answer</summary>
-Because the meaning of rows and columns changes across data structures. In Python `AnnData`, the processed object is cells x genes, so we transpose to get the genes x cells matrix used by CoGAPS. In R `SingleCellExperiment`, genes already live in rows and cells in columns, so the imported matrix is already aligned to the CoGAPS expectation.
+Because the meaning of rows and columns changes across data structures. In R `SingleCellExperiment`, genes live in rows and cells in columns, so the imported matrix is already aligned to the CoGAPS expectation. In Python `AnnData`, the processed object is cells x genes, so we transpose to get the genes x cells matrix used by CoGAPS.
 </details>
 ::::
 :::

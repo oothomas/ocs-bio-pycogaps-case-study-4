@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Assess stim-vs-ctrl directionality for CoGAPS pattern genes.
+"""Assess stim-vs-ctrl directionality for Python/PyCoGAPS pattern genes.
 
 This script answers a reviewer-facing question that CoGAPS alone does not:
 the CoGAPS A matrix identifies genes that define each pattern, but expression
 direction needs to be estimated from the underlying count data.
+
+The selected Python `.h5ad` is a full-local input. The directionality tables and
+heatmap written to `data/results_selected/` are lightweight cooking-show
+artifacts used by the secondary Python tab when the full model object is absent.
 
 The analysis uses replicate-aware pseudobulk summaries:
 
@@ -18,6 +22,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import os
 
 import anndata as ad
 import matplotlib.pyplot as plt
@@ -28,9 +33,20 @@ from scipy import sparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PREPROCESSED_H5AD = ROOT / "data/processed/preprocessed_cells_hvg3000.h5ad"
-CHOSEN_RESULT_H5AD = ROOT / "data/results/cogaps_K7_seed2_iter2000.h5ad"
-OUT_DIR = ROOT / "data/results"
+PREPROCESSED_H5AD = Path(
+    os.environ.get(
+        "COGAPS_PREPROCESSED_H5AD",
+        ROOT / "data/processed/preprocessed_cells_hvg3000.h5ad",
+    )
+)
+CHOSEN_RESULT_H5AD = Path(
+    os.environ.get(
+        "COGAPS_RESULT_H5AD",
+        ROOT / "data/results_selected/cogaps_K6_seed2_iter2000.h5ad",
+    )
+)
+OUT_DIR = Path(os.environ.get("COGAPS_OUT_DIR", ROOT / "data/results_selected"))
+IFN_PATTERN = os.environ.get("COGAPS_IFN_PATTERN", "").strip()
 
 TOP_N_GENES = 15
 MIN_CELLS_PER_PSEUDOBULK = 20
@@ -342,8 +358,21 @@ def write_readme(
     global_summary: pd.DataFrame,
     pattern_summary: pd.DataFrame,
 ) -> None:
-    p2 = pattern_summary.loc[pattern_summary["pattern"] == "Pattern2"].iloc[0]
-    p7 = pattern_summary.loc[pattern_summary["pattern"] == "Pattern7"].iloc[0]
+    if IFN_PATTERN and IFN_PATTERN in set(pattern_summary["pattern"]):
+        ifn_pattern = IFN_PATTERN
+    else:
+        ifn_pattern = (
+            pattern_summary
+            .sort_values(["n_up_in_stim", "median_mean_log2fc"], ascending=False)
+            .iloc[0]["pattern"]
+        )
+    ifn_row = pattern_summary.loc[pattern_summary["pattern"] == ifn_pattern].iloc[0]
+    secondary = (
+        pattern_summary
+        .loc[pattern_summary["pattern"] != ifn_pattern]
+        .sort_values(["n_up_in_stim", "median_mean_log2fc"], ascending=False)
+    )
+    secondary_row = secondary.iloc[0] if not secondary.empty else None
 
     lines = [
         "# Pattern Gene Directionality Analysis",
@@ -369,9 +398,15 @@ def write_readme(
         "",
         "## Main Result",
         "",
-        f"- `Pattern2`: {int(p2.n_up_in_stim)} of {int(p2.n_top_genes)} top genes are up in stimulation by the global paired pseudobulk summary.",
-        f"- `Pattern7`: {int(p7.n_up_in_stim)} of {int(p7.n_top_genes)} top genes are up in stimulation by the global paired pseudobulk summary.",
-        "- This supports treating Pattern2 as an IFN-stimulated program, with Pattern7 as a secondary stimulation-associated candidate.",
+        f"- `{ifn_pattern}` is treated as the IFN-associated pattern for this run.",
+        f"- `{ifn_pattern}`: {int(ifn_row.n_up_in_stim)} of {int(ifn_row.n_top_genes)} top genes are up in stimulation by the global paired pseudobulk summary.",
+        (
+            f"- `{secondary_row.pattern}` has the next largest up-in-stimulation count among top pattern genes: "
+            f"{int(secondary_row.n_up_in_stim)} of {int(secondary_row.n_top_genes)}."
+            if secondary_row is not None else
+            "- No secondary pattern summary is available."
+        ),
+        "- This supports using directionality as evidence for interpreting the IFN-associated pattern, while keeping non-IFN or secondary pattern labels more cautious.",
         "",
         "## Caveats",
         "",
@@ -456,23 +491,18 @@ def main() -> None:
 
     print(f"Wrote outputs to: {OUT_DIR}")
     print(pattern_summary.to_string(index=False))
-    print("\nPattern2 global gene directions:")
+
+    if IFN_PATTERN and IFN_PATTERN in set(pattern_summary["pattern"]):
+        ifn_pattern = IFN_PATTERN
+    else:
+        ifn_pattern = (
+            pattern_summary
+            .sort_values(["n_up_in_stim", "median_mean_log2fc"], ascending=False)
+            .iloc[0]["pattern"]
+        )
+    print(f"\n{ifn_pattern} global gene directions:")
     print(
-        global_summary.loc[global_summary["pattern"] == "Pattern2", [
-            "pattern",
-            "rank",
-            "gene",
-            "mean_log2fc_stim_vs_ctrl",
-            "n_up_pairs",
-            "n_down_pairs",
-            "wilcoxon_fdr",
-            "direction",
-            "evidence_strength",
-        ]].to_string(index=False)
-    )
-    print("\nPattern7 global gene directions:")
-    print(
-        global_summary.loc[global_summary["pattern"] == "Pattern7", [
+        global_summary.loc[global_summary["pattern"] == ifn_pattern, [
             "pattern",
             "rank",
             "gene",

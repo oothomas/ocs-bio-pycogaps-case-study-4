@@ -3,14 +3,9 @@
 
 Before running or interpreting a model, we should inspect what is in the processed single-cell object.
 
-```{python}
-print("Shape:", adata_cells.shape)
-print("Observation columns:", list(adata_cells.obs.columns))
-print("Variable columns:", list(adata_cells.var.columns))
-print("Layers:", list(adata_cells.layers.keys()))
-```
+::: {.panel-tabset}
 
-<details><summary>R alternative: inspect the <code>SingleCellExperiment</code></summary>
+### R
 
 ```{r}
 cat("Shape:", paste(dim(sce_cells), collapse = " x "), "\n")
@@ -19,13 +14,38 @@ cat("rowData columns:", paste(colnames(rowData(sce_cells)), collapse = ", "), "\
 cat("Assays:", paste(assayNames(sce_cells), collapse = ", "), "\n")
 ```
 
-</details>
+### Python
 
-The object has cells as rows and genes as columns in the Python `AnnData` representation. The shape should be 24,673 cells by 3,000 highly variable genes.
+```{python}
+print("Shape:", adata_cells.shape)
+print("Observation columns:", list(adata_cells.obs.columns))
+print("Variable columns:", list(adata_cells.var.columns))
+print("Layers:", list(adata_cells.layers.keys()))
+```
 
-In the R `SingleCellExperiment` representation, the same data are stored in the Bioconductor convention with genes in rows and cells in columns. That is convenient for the R CoGAPS path later.
+:::
+
+The object has genes as rows and cells as columns in the R `SingleCellExperiment` representation. That is the orientation expected by the R `CoGAPS` workflow. In the Python `AnnData` representation, the same processed object is cells by genes, so the Python CoGAPS input must be transposed before model fitting.
 
 ## Condition and cell-type summaries
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+condition_counts_r <- as.data.frame(table(colData(sce_cells)$condition), stringsAsFactors = FALSE)
+colnames(condition_counts_r) <- c("condition", "n_cells")
+condition_counts_r[order(condition_counts_r$n_cells, decreasing = TRUE), ]
+```
+
+```{r}
+celltype_counts_r <- as.data.frame(table(colData(sce_cells)$cell_type), stringsAsFactors = FALSE)
+colnames(celltype_counts_r) <- c("cell_type", "n_cells")
+celltype_counts_r[order(celltype_counts_r$n_cells, decreasing = TRUE), ]
+```
+
+### Python
 
 ```{python}
 condition_counts = (
@@ -49,52 +69,33 @@ condition_counts
 celltype_counts
 ```
 
-<details><summary>R alternative: summarize conditions and cell types</summary>
-
-```{r}
-condition_counts_r <- as.data.frame(table(colData(sce_cells)$condition), stringsAsFactors = FALSE)
-colnames(condition_counts_r) <- c("condition", "n_cells")
-condition_counts_r[order(condition_counts_r$n_cells, decreasing = TRUE), ]
-```
-
-```{r}
-celltype_counts_r <- as.data.frame(table(colData(sce_cells)$cell_type), stringsAsFactors = FALSE)
-colnames(celltype_counts_r) <- c("cell_type", "n_cells")
-celltype_counts_r[order(celltype_counts_r$n_cells, decreasing = TRUE), ]
-```
-
-</details>
+:::
 
 We can also check whether every donor or replicate has cells in both conditions.
 
-```{python}
-pd.crosstab(adata_cells.obs["replicate"], adata_cells.obs["condition"])
-```
+::: {.panel-tabset}
 
-<details><summary>R alternative: replicate-by-condition table</summary>
+### R
 
 ```{r}
 table(colData(sce_cells)$replicate, colData(sce_cells)$condition)
 ```
 
-</details>
+### Python
+
+```{python}
+pd.crosstab(adata_cells.obs["replicate"], adata_cells.obs["condition"])
+```
+
+:::
 
 ## Sparsity
 
 Single-cell RNA-seq matrices often contain many zeros. We can measure sparsity directly.
 
-```{python}
-X = adata_cells.X
-nnz = X.nnz if sparse.issparse(X) else np.count_nonzero(X)
-total = adata_cells.n_obs * adata_cells.n_vars
-sparsity = 1 - (nnz / total)
+::: {.panel-tabset}
 
-print(f"Nonzero entries: {nnz:,}")
-print(f"Total entries: {total:,}")
-print(f"Sparsity: {sparsity:.4%}")
-```
-
-<details><summary>R alternative: sparsity summary</summary>
+### R
 
 ```{r}
 X_r <- assay(sce_cells, "X")
@@ -107,7 +108,20 @@ cat("Total entries:", format(total_r, big.mark = ","), "\n")
 cat(sprintf("Sparsity: %.4f%%\n", 100 * sparsity_r))
 ```
 
-</details>
+### Python
+
+```{python}
+X = adata_cells.X
+nnz = X.nnz if sparse.issparse(X) else np.count_nonzero(X)
+total = adata_cells.n_obs * adata_cells.n_vars
+sparsity = 1 - (nnz / total)
+
+print(f"Nonzero entries: {nnz:,}")
+print(f"Total entries: {total:,}")
+print(f"Sparsity: {sparsity:.4%}")
+```
+
+:::
 
 The processed object is about 96 percent zeros. This sparse structure is one reason that we use methods designed for high-dimensional single-cell data and interpret individual genes carefully.
 
